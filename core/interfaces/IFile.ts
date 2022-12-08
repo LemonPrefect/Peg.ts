@@ -1,1 +1,8 @@
-export interface IFile{}
+export interface IFile{
+  key: string,
+  hash: string,
+  size: number,
+  mime: string,
+  time: string,
+  local: string
+}

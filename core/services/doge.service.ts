@@ -14,7 +14,7 @@ export class DogeService{
   }
 
   private compact(data: Record<string, string | number>): string{
-    let result: Array<string> = [];
+    const result: Array<string> = [];
     for (const [k, v] of Object.entries(data)){
       result.push(encodeURI(`${k}=${v}`));
     }
