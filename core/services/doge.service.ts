@@ -31,7 +31,7 @@ export class DogeService{
     return await axiod({
       baseURL: `${this.config.protocol}://${this.config.portal}`,
       method: "POST",
-      url: `${signPath}`,
+      url: `${path}`,
       params: params,
       headers: {
         "Authorization": `TOKEN ${this.config.secretId}:${this.sign(signPath, data, isJson)}`,

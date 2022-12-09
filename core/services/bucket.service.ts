@@ -18,10 +18,11 @@ export class BucketService extends DogeService{
     return buckets;
   }
 
-  public async createBucket(alias: string, region: string): Promise<void>{
+  public async createBucket(alias: string, region: string, level = "basic"): Promise<void>{
     requestErrorHandler(await this.query("/oss/bucket/create.json", {
       "name": alias,
-      "region": {"ap-shanghai": 0, "ap-beijing": 1, "ap-guangzhou": 2, "ap-chengdu": 3}[region]! //!!! Assure in commands
+      "region": {"ap-shanghai": 0, "ap-beijing": 1, "ap-guangzhou": 2, "ap-chengdu": 3}[region]!, //!!! Assure in commands
+      "level": level
     }));
   }
 

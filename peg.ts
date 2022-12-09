@@ -29,8 +29,8 @@ await new Command()
 
 
 /** Functions from Tencent COS CLI
- * 生成与修改配置文件 - config
- * [√] 创建存储桶 - mb
+ * [√√] 生成与修改配置文件 - config
+ * [√√] 创建存储桶 - mb
  * [√] 删除存储桶 - rb
  * [x] 存储桶标签 - bucket-tagging - 无标签
  * 查询存储桶或文件列表 - ls

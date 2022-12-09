@@ -3,11 +3,16 @@ import { IBucket } from "../interfaces/IBucket.ts";
 import { BucketService } from "../services/bucket.service.ts"
 import { ConfigService } from "../services/config.service.ts";
 export class Bucket{
-  private bucketService: BucketService;
+  private service: BucketService;
 
   constructor(configService: ConfigService){
-    this.bucketService = new BucketService(configService);
+    this.service = new BucketService(configService);
   }
 
-  
+  public async createBucket(alias: string, region: string, level = "basic"){
+    return await this.service.createBucket(alias, region, level);
+  }
+  public async getBuckets(){
+    return await this.service.getBuckets();
+  }
 }
