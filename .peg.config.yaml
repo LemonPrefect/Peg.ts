@@ -1,0 +1,6 @@
+protocol: https
+portal: api.dogecloud.com
+secretId: 
+secretKey: 
+sessionToken: null
+buckets: []

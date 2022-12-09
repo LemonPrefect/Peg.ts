@@ -13,7 +13,7 @@ export class DogeService{
     this.config = this.configService.getConfig();
   }
 
-  private compact(data: Record<string, string | number>): string{
+  private compact(data: Record<string, string | number> | Array<string | number> ): string{
     const result: Array<string> = [];
     for (const [k, v] of Object.entries(data)){
       result.push(encodeURI(`${k}=${v}`));
@@ -21,12 +21,12 @@ export class DogeService{
     return result.join("&");
   }
   
-  private sign(path: string, data: Record<string, string | number>, isJson = true): string{
+  private sign(path: string, data: Record<string, string | number> | Array<string | number> , isJson = true): string{
     const body: string = isJson ? JSON.stringify(data) : this.compact(data);
     return hmac("sha1", this.config.secretKey, `${path}\n${body}`, "utf8", "hex").toString();
   }
 
-  protected async query(path: string, params: Record<string, string | number> = {}, data: Record<string, string | number> = {}, isJson = true): Promise<IAxiodResponse>{
+  protected async query(path: string, params: Record<string, string | number> = {}, data: Record<string, string | number> | Array<string | number> = {}, isJson = true): Promise<IAxiodResponse>{
     const signPath = Object.keys(params).length === 0 ? `${path}` : `${path}?${this.compact(params)}`;
     return await axiod({
       baseURL: `${this.config.protocol}://${this.config.portal}`,

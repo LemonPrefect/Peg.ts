@@ -3,6 +3,7 @@ import { DogeService } from "./doge.service.ts";
 import { requestErrorHandler } from "../exception/request.exceptions.ts";
 
 export class BucketService extends DogeService{
+  
   public async getBuckets(): Promise<Array<IBucket>>{
     const response = requestErrorHandler(await this.query("/oss/bucket/list.json"));
     const buckets: Array<IBucket> = [] as Array<IBucket>;
