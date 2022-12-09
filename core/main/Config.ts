@@ -29,6 +29,7 @@ export class Config{
   }
 
   public getConfig = () => this.service.getConfig()
+  
   public getService = () => this.service
 
   public getBucket = (alias: string) => this.service.getBucket(alias)

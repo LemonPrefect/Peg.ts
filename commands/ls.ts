@@ -3,6 +3,16 @@
  * https://cloud.tencent.com/document/product/436/63668
  */
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
+import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
+import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
+import { Config } from "../core/main/Config.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
+import { Table, Row, Cell } from "https://deno.land/x/cliffy@v0.25.5/table/mod.ts";
+import { File } from "../core/main/File.ts"
+import { IFile } from "../core/interfaces/IFile.ts";
+
+
+const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 
 export default await new Command()
@@ -12,7 +22,80 @@ export default await new Command()
     "List file recursively",
     "./peg ls doge://examplebucket/test/ -r"
   )
+  
+  .arguments("<dogeurl: string>")
+  
   .option("-r, --recursive", "List objects recursively")
   .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
   .option("--include <include:string>", "List files that meet the specified criteria")
   .option("--limit <limit:integer>", "Limit the number of objects listed(0~1000)")
+  
+  .action(async(e, dogeurl) => {
+    let { exclude, include, limit, configPath, recursive } = e as unknown as {exclude: string, include: string, limit: number, configPath: string, recursive: boolean};
+    if(!configPath){
+      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
+    }
+    try{
+      const config = new Config(configPath);
+      let [dogeBucket, dogePath] = (dogeurl as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
+
+      if(!dogePath){
+        dogePath = ""
+      }
+      if(!dogePath.endsWith("/") && !(dogePath === "")){
+        dogePath += "/"
+      }
+      if(!dogeBucket){
+        throw new Error(`dogeBucket: ${dogeBucket} or dogePath: ${dogePath} is invalid.`);
+      }
+      const bucket = config.getBucket(dogeBucket);
+      if(!bucket){
+        throw new Error(`Bucket ${dogeBucket} doesn't exist in config ${configPath}.`);
+      }
+
+      const file = new File(config.getService(), bucket);
+      let files: Array<IFile> = [] as Array<IFile>;
+      if(recursive){
+        files = await file.getFilesRecurse(dogePath);
+      }else{
+        files = (await file.getFiles(dogePath, limit)).files;
+      }
+      files = file.filterFiles(files, include, exclude);
+      const body: Array<Array<string>> = [] as Array<Array<string>>;
+      for(const file of files){
+        body.push(Row.from([
+          file.key,
+          file.key.endsWith("/") ? "dir" : "standard",
+          file.time,
+          File.formatBytes(file.size),
+        ]).align("right"))
+      }
+      Table
+        .from([
+          ...body,
+          Row.from([new Cell("Total Objects:").colSpan(3).align("right"), new Cell(files.length)]).border(false)
+        ])
+        .header(Row.from(["Key", "Type", "Last Modified", "Size"]).border(false).align("center"))
+        .border(true)
+        .chars({
+          "top": "-",
+          "topMid": "+",
+          "topLeft": "",
+          "topRight": "",
+          "bottom": "-",
+          "bottomMid": "+",
+          "bottomLeft": "",
+          "bottomRight": "",
+          "left": "",
+          "leftMid": "",
+          "mid": "",
+          "midMid": "",
+          "right": "",
+          "rightMid": "",
+          "middle": "│"
+        })
+        .render();  
+    }catch(e){
+      console.log(error("[ERROR]"), e.message);
+    }
+  })

@@ -9,9 +9,16 @@ export class Bucket{
     this.service = new BucketService(configService);
   }
 
+  public getService = () => this.service
+  
   public async createBucket(alias: string, region: string, level = "basic"){
     return await this.service.createBucket(alias, region, level);
   }
+
+  public async deleteBucket(alias: string){
+    return await this.service.deleteBucket(alias);
+  }
+  
   public async getBuckets(){
     return await this.service.getBuckets();
   }

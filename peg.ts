@@ -2,6 +2,7 @@ import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
 import ls from "./commands/ls.ts";
 import mb from "./commands/mb.ts";
+import rb from "./commands/rb.ts";
 import config from "./commands/config/config.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
@@ -25,13 +26,14 @@ await new Command()
   .command("config", config)
   .command("ls", ls)
   .command("mb", mb)
+  .command("rb", rb)
   .parse(Deno.args)
 
 
 /** Functions from Tencent COS CLI
  * [√√] 生成与修改配置文件 - config
  * [√√] 创建存储桶 - mb
- * [√] 删除存储桶 - rb
+ * [√√] 删除存储桶 - rb
  * [x] 存储桶标签 - bucket-tagging - 无标签
  * 查询存储桶或文件列表 - ls
  * 获取不同类型文件的统计信息 - du

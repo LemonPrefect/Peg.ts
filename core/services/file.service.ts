@@ -18,7 +18,7 @@ export class FileService extends DogeService{
     return this;
   }
   
-  public async getFiles(limit = 1000, next = "", prefix = ""){
+  public async getFiles(limit = 1000, prefix = "", next = ""){
     const response = requestErrorHandler(await this.query("/oss/file/list.json", {
       "bucket": this.bucket.alias,
       "limit": limit,
