@@ -25,12 +25,11 @@ const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.
 interface options{
   exclude: string, 
   include: string, 
-  meta: string, 
   partSize: number, 
-  rateLimiting: number, 
   threadNum: number, 
   configPath: string, 
-  recursive: boolean
+  recursive: boolean,
+  signUrl: boolean
 }
 
 export default await new Command()
@@ -53,14 +52,19 @@ export default await new Command()
 
   .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
   .option("--include <include:string>", "Exclude files that meet the specified criteria")
-  .option("--meta <meta:string>", "Set the meta information of the file, the format is header:value#header:value, the example is Cache-Control:no-cache#Content-Encoding:gzip")
-  .option("--part-size <partSize:number>", "(Upload only) Specifies the block size(MB) (default 32)")
-  .option("--rate-limiting <rateLimiting:number>", "(Upload only) Upload speed limit(MB/s)")
+  .option("--part-size <partSize:number>", "(Upload only) Specifies the block size(MB)", {
+    default: 32
+  })
   .option("-r, --recursive", "List objects recursively")
-  .option("--thread-num <threadNum:number>", "(Upload only) Specifies the number of concurrent upload or download threads (default 5)")
+  .option("--thread-num <threadNum:number>", "(Upload only) Specifies the number of concurrent upload threads", {
+    default: 5
+  })
+  .option("-s, --sign-url", "(Download only) Generate OSS signed URL, CHARGED.", {
+    default: false
+  })
 
   .action(async(e, ...paths) => {
-    let { exclude, include, meta, partSize, rateLimiting, threadNum, configPath, recursive } = e as unknown as options;
+    let { exclude, include, partSize, threadNum, configPath, recursive, signUrl } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");

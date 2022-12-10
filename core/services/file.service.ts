@@ -50,7 +50,7 @@ export class FileService extends DogeService{
     return {files: files, continue: response.data.data.continue ?? undefined}
   }
 
-  public async uploadFiles(files: Array<IFile>, callback: Function | undefined = undefined){
+  public async uploadFiles(files: Array<IFile>, chunkSize = 32, threadLimit = 5, callback: Function | undefined = undefined){
     const response = requestErrorHandler(await this.query("/oss/upload/auth.json", {}, {
       "scope": `${this.bucket.alias}:*`,
       "deadline": Math.round(new Date().getTime() / 1000) + 3600
@@ -59,19 +59,36 @@ export class FileService extends DogeService{
     const cos = new COS({
       SecretId: accessKeyId,
       SecurityToken: sessionToken,
-      SecretKey: secretKey
+      SecretKey: secretKey,
+      ChunkParallelLimit: threadLimit
     });
     const preprefix: string = JSON.parse(new TextDecoder().decode(base64.toUint8Array(info))).preprefix;
     
     for(const file of files){
       cos.sliceUploadFile({
+        ChunkSize: chunkSize,
         Bucket: this.bucket.name,
         Region: this.bucket.region,
         Key: `${preprefix}${file.key}`,
         FilePath: file.local!,
-        onTaskStart: (taskInfo: COS.Task) => {return},
-        onProgress: (params: COS.ProgressInfo) => {return}
-      }, (err: COS.CosError, data: COS.SliceUploadFileResult) => {return});
+        onTaskStart: (taskInfo: COS.Task) => {
+          if(callback){
+            callback(`${file.local} => ${preprefix}${file.key}`, files.indexOf(file), files.length, 0);
+          }
+        },
+        onProgress: (params: COS.ProgressInfo) => {
+          if(callback){
+            callback(`${file.local} => ${preprefix}${file.key}`, files.indexOf(file) + 1, files.length, Math.round(params.percent * 100));
+          }
+        }
+      }, (err: COS.CosError, data: COS.SliceUploadFileResult) => {
+        if(err){
+          throw err;
+        }
+        if(callback){
+          callback(`${file.local} => ${preprefix}${file.key}`, files.indexOf(file), files.length, 100);
+        }
+      });
     }
   }
 

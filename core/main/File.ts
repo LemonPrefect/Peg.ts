@@ -28,8 +28,8 @@ export class File{
     return result;
   }
   
-  public async uploadFiles(files: Array<IFile>){
-    await this.service.uploadFiles(files);
+  public async uploadFiles(files: Array<IFile>, chunkSize = 32, threadLimit = 5, callback: Function | undefined = undefined){
+    await this.service.uploadFiles(files, chunkSize, threadLimit, callback);
   }
 
   public async downloadFile(file: IFile, sign = false){
