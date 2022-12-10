@@ -56,7 +56,7 @@ export default await new Command()
   })
 
   .action(async(e, ...paths) => {
-    let { exclude, include, partSize, threadNum, configPath, recursive, signUrl } = e as unknown as options;
+    let { configPath } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");

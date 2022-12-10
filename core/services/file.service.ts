@@ -1,11 +1,8 @@
 import COS from "npm:cos-nodejs-sdk-v5@2.11.18/index.js";
-import * as base64url from "https://denopkg.com/chiefbiiko/base64/base64url.ts";
+import * as base64url from "https://denopkg.com/chiefbiiko/base64@master/base64url.ts";
 import * as base64 from "https://denopkg.com/chiefbiiko/base64/mod.ts";
 import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
-import { iterateReader } from "https://deno.land/std@0.167.0/streams/iterate_reader.ts";
-import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
 import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
-import { createHash } from "https://deno.land/std@0.80.0/hash/mod.ts";
 import { IBucket } from "../interfaces/IBucket.ts";
 import { DogeService } from "./doge.service.ts";
 import { IFile } from "../interfaces/IFile.ts";
@@ -136,10 +133,6 @@ export class FileService extends DogeService{
     await res.body?.pipeTo(pipe.writable);
   }
 
-  public async hashFile(file: IFile){
-    throw Error("No one knows how DogeCloud hash their files. w(ﾟДﾟ)w");
-  }
-
   public async setFileMime(files: Array<IFile>, mime: string){
     const keys: Array<string> = [] as Array<string>;
     for(const file of files){
@@ -181,9 +174,6 @@ export class FileService extends DogeService{
     return {url: response.data.data.url, tip: response.data.data.tips ?? ""}
 
   }
-
-
-  public async syncFiles(remote: Array<IFile>, local: Array<IFile>)/** : Promise<Array<IFile>> */{} // Check two groups CRC match
 }
 
 // const config = new ConfigService(`C:\\Users\\lenovo\\.peg.config.yaml`);

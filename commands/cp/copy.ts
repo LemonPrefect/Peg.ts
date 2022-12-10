@@ -13,8 +13,8 @@ const bars = new progress.MultiProgressBar({
 
 export default async function copy(config: Config, paths: Array<string>, options: any){
 
-  let [sourceBucket, sourcePath] = (paths[0] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
-  let [destinationBucket, destinationPath] = (paths[1] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
+  const [sourceBucket, sourcePath] = (paths[0] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
+  const [destinationBucket, destinationPath] = (paths[1] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
   
   if(!sourceBucket){
     throw new Error(`sourceBucket: \`${sourceBucket}' or sourcePath: \`${sourcePath}' is invalid.`);

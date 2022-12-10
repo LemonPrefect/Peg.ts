@@ -2,7 +2,6 @@ import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
 import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
 import { walk } from "https://deno.land/std@0.121.0/fs/walk.ts";
 import * as progress from "https://deno.land/x/progress@v1.3.4/mod.ts";
-import { mime } from "https://deno.land/x/mimetypes@v1.0.0/mod.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
@@ -14,7 +13,7 @@ const bars = new progress.MultiProgressBar({
 
 export default async function upload(config: Config, paths: Array<string>, options: any){
   const fullpath = path.resolve(paths[0]);
-  let [dogeBucket, dogePath] = (paths[1] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
+  const [dogeBucket, dogePath] = (paths[1] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
   if(!dogeBucket){
     throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
   }

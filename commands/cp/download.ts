@@ -15,7 +15,7 @@ const bars = new progress.MultiProgressBar({
 
 export default async function download(config: Config, paths: Array<string>, options: any){
   const fullpath = path.resolve(paths[1]);
-  let [dogeBucket, dogePath] = (paths[0] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
+  const [dogeBucket, dogePath] = (paths[0] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
   if(!dogeBucket){
     throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
   }
