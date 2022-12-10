@@ -37,10 +37,11 @@ export default async function upload(config: Config, paths: Array<string>, optio
     if(!dogePath || !dogePath.endsWith("/")){
       throw new Error("dogeurl should be a directory.");
     }
+    
     for await (const entry of walk(fullpath, { maxDepth: options.recursive ? Infinity : 1 })){
       if(entry.isFile){
         files.push({
-          key: entry.name,
+          key: path.posix.join(dogePath, path.posix.normalize(entry.path).replace(path.posix.normalize(fullpath), "").replace("\\", "/")).replace("\\", "/"),
           local: entry.path
         } as IFile);
       }
