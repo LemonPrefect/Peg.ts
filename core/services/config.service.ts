@@ -9,14 +9,14 @@ export class ConfigService{
 
   constructor(path: string){
     this.path = path;
-    this.config = this.parse(this.readConfig(path));
+    this.config = this.parseConfig(this.readConfig(path));
   }
 
   private readConfig(path: string): string{
     return fs.readFileSync(path).toString();
   }
 
-  private parse(config: string): IConfig{
+  private parseConfig(config: string): IConfig{
     const data = yaml.parse(config) as IConfig;
     if(!data){
       throw Error("Parse Error.");
@@ -41,7 +41,7 @@ export class ConfigService{
     this.config.buckets.push(bucket);
   }
 
-  public getBucket(alias: string): IBucket | undefined{
+  public getBucket(alias: string): IBucket | undefined{ ///TODO: Filter
     for(const bucket of this.config.buckets){
       if(bucket.alias === alias){
         return bucket;

@@ -37,7 +37,7 @@ export class DogeService{
         "Authorization": `TOKEN ${this.config.secretId}:${this.sign(signPath, data, isJson)}`,
         "Content-Type": isJson ? "application/json" : "application/x-www-form-urlencoded"
       },
-      data: data // when EMPTY, KEEP as `{}'. Don't ask me why, ask Dogecloud for why they needed this.
+      data: isJson ? data : this.compact(data) // when EMPTY, KEEP as `{}'. Don't ask me why, ask Dogecloud for why they needed this.
     })
   }
 }

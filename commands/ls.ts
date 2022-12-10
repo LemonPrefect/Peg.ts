@@ -8,6 +8,8 @@ import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
 import { Config } from "../core/main/Config.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
 import { Table, Row, Cell } from "https://deno.land/x/cliffy@v0.25.5/table/mod.ts";
+import { tty } from "https://deno.land/x/cliffy@v0.25.5/ansi/tty.ts";
+import { ansi } from "https://deno.land/x/cliffy@v0.25.5/ansi/ansi.ts";
 import { File } from "../core/main/File.ts"
 import { IFile } from "../core/interfaces/IFile.ts";
 
@@ -23,7 +25,7 @@ export default await new Command()
     "./peg ls doge://examplebucket/test/ -r"
   )
   
-  .arguments("<dogeurl: string>")
+  .arguments("[dogeurl: string]")
   
   .option("-r, --recursive", "List objects recursively")
   .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
@@ -37,30 +39,47 @@ export default await new Command()
     }
     try{
       const config = new Config(configPath);
+      if(!dogeurl){
+        console.log("Buckets: ");
+        const body: Array<Array<string>> = [];
+        for(const bucket of config.getConfig().buckets){
+          body.push([bucket.name, bucket.alias, bucket.region, bucket.endpoint])
+        }
+        new Table()
+        .header(["Name", "Alias", "Region", "Endpoint"])
+        .body(body)
+        .border(true)
+        .render();
+        return;
+      }
       let [dogeBucket, dogePath] = (dogeurl as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
 
       if(!dogePath){
-        dogePath = ""
+        dogePath = "";
       }
       if(!dogePath.endsWith("/") && !(dogePath === "")){
-        dogePath += "/"
+        dogePath += "/";
       }
+      
       if(!dogeBucket){
-        throw new Error(`dogeBucket: ${dogeBucket} or dogePath: ${dogePath} is invalid.`);
+        throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
       }
       const bucket = config.getBucket(dogeBucket);
       if(!bucket){
-        throw new Error(`Bucket ${dogeBucket} doesn't exist in config ${configPath}.`);
+        throw new Error(`Bucket \`${dogeBucket}' doesn't exist in config ${configPath}.`);
       }
-
       const file = new File(config.getService(), bucket);
       let files: Array<IFile> = [] as Array<IFile>;
       if(recursive){
-        files = await file.getFilesRecurse(dogePath);
+        files = await file.getFilesRecurse(dogePath, (key: string) => {
+          tty.eraseLine;
+          console.log(`Walking ${key}...${ansi.eraseLineEnd.toString()}`);
+          tty.cursorUp(1);
+        });
       }else{
         files = (await file.getFiles(dogePath, limit)).files;
       }
-      files = file.filterFiles(files, include, exclude);
+      files = file.filterFilesRemote(files, include, exclude);
       const body: Array<Array<string>> = [] as Array<Array<string>>;
       for(const file of files){
         body.push(Row.from([

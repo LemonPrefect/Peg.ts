@@ -22,4 +22,9 @@ export class Bucket{
   public async getBuckets(){
     return await this.service.getBuckets();
   }
+  public async getDomain(bucket: IBucket){
+    return await this.service.getBucketDomain(bucket);
+  }
+
+
 }

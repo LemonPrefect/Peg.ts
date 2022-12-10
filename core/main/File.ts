@@ -14,12 +14,13 @@ export class File{
     return await this.service.getFiles(limit, prefix);
   }
 
-  public async getFilesRecurse(prefix: string, limit = 1000, store: Array<IFile> = [] as Array<IFile>): Promise<Array<IFile>>{
+  public async getFilesRecurse(prefix: string, callback: Function, limit = 1000, store: Array<IFile> = [] as Array<IFile>): Promise<Array<IFile>>{
     const result: Array<IFile> = store;
     const {files, continue: string} = await this.getFiles(prefix);
     for(const file of files){
       if(file.key.endsWith("/")){
-        result.push(...await this.getFilesRecurse(file.key, limit, []));
+        callback(file.key);
+        result.push(...await this.getFilesRecurse(file.key,callback, limit, []));
       }else{
         result.push(file);
       }
@@ -27,8 +28,26 @@ export class File{
     return result;
   }
   
-  public filterFiles(files: Array<IFile>, include = ".*", exclude = "//"): Array<IFile>{
+  public async uploadFiles(files: Array<IFile>){
+    await this.service.uploadFiles(files);
+  }
+
+  public async downloadFile(file: IFile, sign = false){
+    await this.service.downloadFile(file, sign)
+  }
+
+  // public async moveFile(){}
+
+  public async copyFile(src: string, dest: string, fromBucket: string, toBucket: string, isForce = false){
+    return await this.service.copyFile(src, dest, fromBucket, toBucket, isForce)
+  }
+
+  public filterFilesRemote(files: Array<IFile>, include = ".*", exclude = "//"): Array<IFile>{
     return files.filter((file) => new RegExp(include, "i").test(file.key) && !new RegExp(exclude, "i").test(file.key));
+  }
+
+  public filterFilesLocal(files: Array<IFile>, include = ".*", exclude = "//"): Array<IFile>{
+    return files.filter((file) => new RegExp(include, "i").test(file.local!) && !new RegExp(exclude, "i").test(file.local!));
   }
 
   public static formatBytes(bytes: number, decimals = 2) {

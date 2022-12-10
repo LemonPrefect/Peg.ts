@@ -1,20 +1,32 @@
 import COS from "npm:cos-nodejs-sdk-v5@2.11.18/index.js";
 import * as base64url from "https://denopkg.com/chiefbiiko/base64/base64url.ts";
+import * as base64 from "https://denopkg.com/chiefbiiko/base64/mod.ts";
+import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
+import { iterateReader } from "https://deno.land/std@0.167.0/streams/iterate_reader.ts";
+import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
+import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
+import { createHash } from "https://deno.land/std@0.80.0/hash/mod.ts";
 import { IBucket } from "../interfaces/IBucket.ts";
 import { DogeService } from "./doge.service.ts";
 import { IFile } from "../interfaces/IFile.ts";
 import { ConfigService } from "./config.service.ts";
+import { BucketService } from "./bucket.service.ts";
 import { requestErrorHandler } from "../exception/request.exceptions.ts";
 
 export class FileService extends DogeService{
-  private bucket: IBucket;
+  private bucket!: IBucket;
+  private bucketDomain!: string;
+  private bucketService: BucketService;
+
   constructor(configService: ConfigService, bucket: IBucket){
     super(configService);
-    this.bucket = bucket;
+    this.bucketService = new BucketService(configService);
+    this.setBucket(bucket);
   }
 
   public async setBucket(bucket: IBucket): Promise<FileService>{
     this.bucket = bucket;
+    this.bucketDomain = await this.bucketService.getBucketDomain(bucket);
     return this;
   }
   
@@ -40,21 +52,23 @@ export class FileService extends DogeService{
 
   public async uploadFiles(files: Array<IFile>, callback: Function | undefined = undefined){
     const response = requestErrorHandler(await this.query("/oss/upload/auth.json", {}, {
-      "scope": `${this.bucket.name}:*`,
+      "scope": `${this.bucket.alias}:*`,
       "deadline": Math.round(new Date().getTime() / 1000) + 3600
     }));
-    const {sessionToken, accessKeyId, secretKey, _} = response.data.data.uploadToken.split(":");
+    const [sessionToken, accessKeyId, secretKey, info] = response.data.data.uploadToken.split(":");
     const cos = new COS({
       SecretId: accessKeyId,
       SecurityToken: sessionToken,
       SecretKey: secretKey
     });
+    const preprefix: string = JSON.parse(new TextDecoder().decode(base64.toUint8Array(info))).preprefix;
+    
     for(const file of files){
       cos.sliceUploadFile({
         Bucket: this.bucket.name,
-        Region: this.bucket.name,
-        Key: file.key,
-        FilePath: file.local!, /** TODO: valid check */
+        Region: this.bucket.region,
+        Key: `${preprefix}${file.key}`,
+        FilePath: file.local!,
         onTaskStart: (taskInfo: COS.Task) => {return},
         onProgress: (params: COS.ProgressInfo) => {return}
       }, (err: COS.CosError, data: COS.SliceUploadFileResult) => {return});
@@ -70,9 +84,7 @@ export class FileService extends DogeService{
       "bucket": this.bucket.alias
     }, keys));
   }
-  
-  public async filterFiles(){}
-  
+    
   /** SAME AREA LIMITED */
   public async moveFile(src: string, dest: string, fromBucket: string = this.bucket.alias, toBucket: string = this.bucket.alias, isForce = false): Promise<void>{
     requestErrorHandler(await this.query("/oss/file/move.json", {}, {
@@ -83,12 +95,32 @@ export class FileService extends DogeService{
   }
 
   /** SAME AREA LIMITED */
-  public async copyFile(src: string, dest: string, fromBucket: string = this.bucket.alias, toBucket: string = this.bucket.alias, isForce = false): Promise<void>{
+  public async copyFile(src: string, dest: string, fromBucket: string, toBucket: string, isForce = false): Promise<void>{
     requestErrorHandler(await this.query("/oss/file/copy.json", {}, {
       "src": base64url.fromUint8Array(new TextEncoder().encode(`${fromBucket}:${src}`)),
       "dest": base64url.fromUint8Array(new TextEncoder().encode(`${toBucket}:${dest}`)),
       "force": isForce ? 1 : 0
     }, false));
+  }
+
+  public async downloadFile(file: IFile, sign = false){
+    if(!file.local){
+      throw new Error(`File \`${file.key}' local path MISSING.`);
+    }
+    const location: path.ParsedPath = path.parse(file.local);
+    const fullpath: string = path.resolve(file.local);
+    if(!fs.existsSync(location.dir)){
+      fs.mkdirSync(location.dir, {
+        recursive: true
+      });
+    }
+    const res = await fetch(sign ? (await this.getSignUrl(file)).url : this.getUrl(file));
+    const pipe = await Deno.open(fullpath, { create: true, write: true });
+    await res.body?.pipeTo(pipe.writable);
+  }
+
+  public async hashFile(file: IFile){
+    throw Error("No one knows how DogeCloud hash their files. w(ﾟДﾟ)w");
   }
 
   public async setFileMime(files: Array<IFile>, mime: string){
@@ -102,7 +134,7 @@ export class FileService extends DogeService{
     }, keys));
   }
 
-  public async getFileInfo(keys: Array<string>): Promise<Array<IFile>>{
+  public async getFilesInfo(keys: Array<string>): Promise<Array<IFile>>{
     const response = requestErrorHandler(await this.query("/oss/file/info.json", {
       "bucket": this.bucket.alias
     }, keys));
@@ -119,8 +151,27 @@ export class FileService extends DogeService{
     return files;
   }
 
-  public async getFileURL(file: IFile){
-    
+  public getUrl(file: IFile, protocol = "http"): string{
+    return `${protocol}://${this.bucketDomain}/${encodeURIComponent(file.key)}`;
   }
+
+  /** COST CNY 0.5/GB/day */
+  public async getSignUrl(file: IFile): Promise<{url: string, tip: string}>{
+    const response = requestErrorHandler(await this.query("/oss/file/sign.json", {
+      "bucket": this.bucket.alias,
+      "key": base64.fromUint8Array(new TextEncoder().encode(file.key))
+    }, {}));
+    return {url: response.data.data.url, tip: response.data.data.tips ?? ""}
+
+  }
+
+
   public async syncFiles(remote: Array<IFile>, local: Array<IFile>)/** : Promise<Array<IFile>> */{} // Check two groups CRC match
 }
+
+// const config = new ConfigService(`C:\\Users\\lenovo\\.peg.config.yaml`);
+// const file = new FileService(config, config.getBucket("imagebutter")!);
+
+// // const dFile = (await file.getFilesInfo(["/index.html"]))[0];
+// // dFile.local = "./a.html";
+// file.hashFile({local: "./a.html"} as IFile)

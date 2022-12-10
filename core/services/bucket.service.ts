@@ -31,5 +31,13 @@ export class BucketService extends DogeService{
       "name": alias
     }));
   }
+
+  public async getBucketDomain(bucket: IBucket): Promise<string>{
+    const response = requestErrorHandler(await this.query("/oss/bucket/info.json", {}, {
+      "name": bucket.alias
+    }, false));
+    return response.data.data.default_domain;
+  }
+
 }
 
