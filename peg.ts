@@ -39,13 +39,14 @@ await new Command()
  * [x] 存储桶标签 - bucket-tagging - 无标签
  * [√√] 查询存储桶或文件列表 - ls
  * [x] 获取不同类型文件的统计信息 - du - 无存档
- * 上传下载或拷贝文件 - cp
- * [?] 同步上传下载或拷贝文件 - sync
+ * [√√] 上传下载或拷贝文件 - cp
+ * [x] 同步上传下载或拷贝文件 - sync - 没有人知道 DogeCloud 的哈希怎么算的 w(ﾟДﾟ)w
  * 删除文件 - rm
- * [?] 获取文件哈希值 - hash - 没有人知道 DogeCloud 的哈希怎么算的 w(ﾟДﾟ)w
- * [?] 列出分块上传中产生的碎片 - lsparts - s3 处理
- * [?] 清理碎片 - abort - s3 处理
+ * [x] 获取文件哈希值 - hash - 没有人知道 DogeCloud 的哈希怎么算的 w(ﾟДﾟ)w
+ * [x] 列出分块上传中产生的碎片 - lsparts - s3 处理
+ * [x] 清理碎片 - abort - s3 处理
  * [x] 取回归档文件 - restore - 无归档
- * [?1] 获取预签名 URL - signurl
- * mv
+ * 获取预签名 URL - signurl
+ * 移动文件 - mv
  */
+

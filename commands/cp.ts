@@ -1,20 +1,12 @@
-/** 查询存储桶或文件列表 - ls
- * ./coscli ls [cos://bucketAlias[/prefix/]] [flag]
- * https://cloud.tencent.com/document/product/436/63668
+/** 上传下载或拷贝文件 - cp
+ * ./coscli cp <source_path> <destination_path> [flags]
+ * https://cloud.tencent.com/document/product/436/63669
  */
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
 import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
 import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
 import { Config } from "../core/main/Config.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
-import { Table, Row, Cell } from "https://deno.land/x/cliffy@v0.25.5/table/mod.ts";
-import { tty } from "https://deno.land/x/cliffy@v0.25.5/ansi/tty.ts";
-import { ansi } from "https://deno.land/x/cliffy@v0.25.5/ansi/ansi.ts";
-import { File } from "../core/main/File.ts"
-import { IFile } from "../core/interfaces/IFile.ts";
-import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
-import { walk } from "https://deno.land/std@0.121.0/fs/walk.ts";
-import { FileService } from "../core/services/file.service.ts";
 import download from "./cp/download.ts";
 import upload from "./cp/upload.ts";
 import copy from "./cp/copy.ts";
