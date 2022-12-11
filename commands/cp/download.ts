@@ -42,11 +42,11 @@ export default async function download(config: Config, paths: Array<string>, opt
   files = file.filterFilesRemote(files, options.include, options.exclude);
 
   // Download a directory but the path is used by a file.
-  if(files.length > 0 && fs.existsSync(fullpath) && fs.lstatSync(fullpath).isFile()){
+  if(files.length > 1 && fs.existsSync(fullpath) && fs.lstatSync(fullpath).isFile()){
     throw new Error(`File ${fullpath} occupied.`);
   }
 
-  const tasks: Array<IFile> = [] as Array<IFile>;
+  let tasks: Array<IFile> = [] as Array<IFile>;
   if(originalFileCount === 1){
     files[0].local = fullpath;
     tasks.push(files[0]);
@@ -57,9 +57,13 @@ export default async function download(config: Config, paths: Array<string>, opt
     }
   }
 
+  if(options.sync){
+    tasks = await file.syncFilter(tasks, options.signUrl === true);
+  }
   if(options.signUrl){
     console.log(warn("[WARN]"), "This url is CHARGED for CNY0.5/GB/DAY");
   }
+
   for(const task of tasks){
     let size;
     try{
@@ -67,15 +71,23 @@ export default async function download(config: Config, paths: Array<string>, opt
     }catch{
       size = 0;
     }
-    downloading(`${task.key} => ${task.local}`, tasks.indexOf(task), tasks.length, size, task.size);
+    if(options.sync){
+      size = 0;
+    }
+    downloading(`${task.key} => ${task.local}`, tasks.indexOf(task), tasks.length, task.size, size);
     await file.downloadFile(task, options.signUrl);
-    downloading(`${task.key} => ${task.local}`, tasks.indexOf(task) + 1, tasks.length, size, task.size)
+    size = fs.lstatSync(task.local!).size;
+    downloading(`${task.key} => ${task.local}`, tasks.indexOf(task) + 1, tasks.length, task.size, size);
   }
 }
 
-function downloading(file: string, index: number,  total: number, size: number,complete: number){
+function downloading(file: string, index: number,  total: number, size: number, complete: number){
+  if(complete === 0 && size == 0){ // For empty files not breaking bars.
+    complete++;
+    size++;
+  }
   bars.render([
     { completed: complete, total: size, text: file },
-    { completed: index, total: total, text: "Total" },
+    { completed: index, total: total, text: "Total" }
   ]);
 }

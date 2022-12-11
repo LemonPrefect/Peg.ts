@@ -22,6 +22,7 @@ export class FileService extends DogeService{
   constructor(configService: ConfigService, bucket: IBucket){
     super(configService);
     this.bucketService = new BucketService(configService);
+    this.bucket = bucket;
     this.setBucket(bucket);
   }
 
@@ -132,10 +133,16 @@ export class FileService extends DogeService{
         recursive: true
       });
     }
-    const res = await fetch(sign ? (await this.getSignUrl(file)).url : this.getUrl(file));
+    if(fs.existsSync(fullpath)){
+      Deno.removeSync(fullpath);
+    }
+    const res = await fetch(sign ? (await this.getSignUrl(file)).url : await this.getUrl(file));
     const pipe = await Deno.open(fullpath, { create: true, write: true });
-    await res.body?.pipeTo(pipe.writable);
+    for await (const chunk of res.body!) {
+      pipe.writeSync(chunk);
+    }
     Deno.close(pipe.rid);
+    
   }
 
   public async setFileMime(files: Array<IFile>, mime: string){
@@ -166,7 +173,10 @@ export class FileService extends DogeService{
     return files;
   }
 
-  public getUrl(file: IFile, protocol = "http"): string{
+  public async getUrl(file: IFile, protocol = "http"): Promise<string>{
+    if(!this.bucketDomain){
+      await this.setBucket(this.bucket);
+    }
     return `${protocol}://${this.bucketDomain}/${encodeURIComponent(file.key)}`;
   }
 
@@ -191,7 +201,7 @@ export class FileService extends DogeService{
   }
 
   public async getHash(file: IFile): Promise<string>{
-    const url = this.getUrl(file);
+    const url = await this.getUrl(file);
     const headers: Headers = (await axiod.get(url, {
       headers: {
         "Range": " bytes=0-0"

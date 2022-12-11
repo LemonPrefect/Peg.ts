@@ -57,7 +57,7 @@ export class File{
   }
 
   public async getUrl(file: IFile, sign = false){
-    return sign ? (await this.service.getSignUrl(file)).url : this.service.getUrl(file);
+    return sign ? (await this.service.getSignUrl(file)).url : await this.service.getUrl(file);
   }
 
   public async getHashRemote(file: IFile, sign = false){
@@ -66,6 +66,24 @@ export class File{
 
   public static async getHashLocal(file: IFile){
     return FileService.calculateHash(file);
+  }
+
+  public async syncFilter(files: Array<IFile>, sign = false){
+    const result: Array<IFile> = [] as Array<IFile>;
+    for(const file of files){
+      let localHash = "";
+      try{
+        localHash = await File.getHashLocal(file);
+      }catch(e){}
+      let remoteHash = "";
+      try{
+        remoteHash = await this.getHashRemote(file, sign);
+      }catch(e){}
+      if((localHash !== remoteHash && localHash !== "0") || (localHash === "" && remoteHash === "")){
+        result.push(file);
+      }
+    }
+    return result;
   }
 
   public static formatBytes(bytes: number, decimals = 2) {

@@ -1,5 +1,4 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
 import ls from "./commands/ls.ts";
 import mb from "./commands/mb.ts";
 import mv from "./commands/mv.ts";
@@ -9,8 +8,6 @@ import config from "./commands/config/config.ts";
 import signurl from "./commands/signurl.ts";
 import hash from "./commands/hash.ts";
 import rm from "./commands/rm.ts";
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 await new Command()
 

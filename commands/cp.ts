@@ -20,6 +20,7 @@ interface options{
   threadNum: number,  
   recursive: boolean,
   signUrl: boolean,
+  sync: boolean,
 
   configPath: string,
   endpoint: string,
@@ -51,7 +52,8 @@ export default await new Command()
     default: 32
   })
   .option("-r, --recursive", "List objects recursively")
-  .option("-s, --sign-url", "(Download/Sync only) Generate OSS signed URL, CHARGED.")
+  .option("-s, --sign-url", "(Download/Sync only) Generate OSS signed URL, CHARGED")
+  .option("--sync", "Examine CRC64 first")
   .option("--thread-num <threadNum:number>", "(Upload only) Specifies the number of concurrent upload threads", {
     default: 5
   })

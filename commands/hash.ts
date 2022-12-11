@@ -28,7 +28,7 @@ export default await new Command()
     "hash for `example.file' in test/ of bucket `example'",
     "./peg hash cos://example/test/example.file"
   )
-  .option("-s, --sign-url", "Generate hash with OSS signed URL, CHARGED.")
+  .option("-s, --sign-url", "Generate hash with OSS signed URL, CHARGED")
   .arguments("<location:string>")
 
   .action(async(e, location) => {

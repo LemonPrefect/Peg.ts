@@ -50,6 +50,10 @@ export default async function upload(config: Config, paths: Array<string>, optio
   }else{
     throw new Error(`${fullpath} rather be a directory or a file to be upload.`);
   }
+  if(options.sync){
+    files = await file.syncFilter(files, options.signUrl === true);
+  }
+
   return await file.uploadFiles(files, options.partSize, options.threadNum, uploading);
 }
 
