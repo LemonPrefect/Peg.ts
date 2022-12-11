@@ -50,9 +50,7 @@ export default await new Command()
   .option("--thread-num <threadNum:number>", "(Upload only) Specifies the number of concurrent upload threads", {
     default: 5
   })
-  .option("-s, --sign-url", "(Download only) Generate OSS signed URL, CHARGED.", {
-    default: false
-  })
+  .option("-s, --sign-url", "(Download/Sync only) Generate OSS signed URL, CHARGED.")
 
   .action(async(e, ...paths) => {
     let { configPath } = e as unknown as options;

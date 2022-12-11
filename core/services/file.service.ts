@@ -98,7 +98,7 @@ export class FileService extends DogeService{
     for(const file of files){
       keys.push(file.key);
     }
-    requestErrorHandler(await this.query("/oss/upload/auth.json", {
+    requestErrorHandler(await this.query("/oss/file/delete.json", {
       "bucket": this.bucket.alias
     }, keys));
   }
@@ -200,7 +200,7 @@ export class FileService extends DogeService{
     return headers.get("x-cos-hash-crc64ecma") ?? "";
   }
 
-  public async calculateHash(file: IFile){
+  public static async calculateHash(file: IFile){
     if(!file.local){
       throw new Error(`File \`${file.key}' local path MISSING.`);
     }

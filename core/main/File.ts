@@ -36,10 +36,16 @@ export class File{
     await this.service.downloadFile(file, sign)
   }
 
-  // public async moveFile(){}
+  public async moveFile(src: string, dest: string, fromBucket: string, toBucket: string, isForce = false){
+    return await this.service.moveFile(src, dest, fromBucket, toBucket, isForce);
+  }
+
+  public async deleteFiles(files: Array<IFile>){
+    this.service.deleteFiles(files);
+  }
 
   public async copyFile(src: string, dest: string, fromBucket: string, toBucket: string, isForce = false){
-    return await this.service.copyFile(src, dest, fromBucket, toBucket, isForce)
+    return await this.service.copyFile(src, dest, fromBucket, toBucket, isForce);
   }
 
   public filterFilesRemote(files: Array<IFile>, include = ".*", exclude = "//"): Array<IFile>{
@@ -52,6 +58,14 @@ export class File{
 
   public async getUrl(file: IFile, sign = false){
     return sign ? (await this.service.getSignUrl(file)).url : this.service.getUrl(file);
+  }
+
+  public async getHashRemote(file: IFile, sign = false){
+    return sign ? await this.service.getSignHash(file) : this.service.getHash(file);
+  }
+
+  public static async getHashLocal(file: IFile){
+    return FileService.calculateHash(file);
   }
 
   public static formatBytes(bytes: number, decimals = 2) {

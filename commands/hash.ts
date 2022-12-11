@@ -1,6 +1,6 @@
-/** 获取预签名 URL - signurl
- * ./coscli signurl cos://<bucketAlias>/<key> [flag]
- * https://tencentcloud.com/zh/document/product/436/43263
+/** 获取文件哈希值 - hash
+ * ./coscli hash <file-path> [--type <hash-type>]
+ * https://www.tencentcloud.com/zh/document/product/436/43259
  */
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
 import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
@@ -14,23 +14,32 @@ import { IFile } from "../core/interfaces/IFile.ts";
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 interface options{
-  configPath: string
+  configPath: string,
+  signUrl: boolean
 }
 
 export default await new Command()
   .usage("[flags]")
-  .description("(CHARGED) Query sign url for 10s")
+  .description("Calculate local file's hash-code or show cos file's hash-code")
   .example(
-    "sign url for `example.file' in test/ of bucket `example'",
-    "./peg signurl cos://example/test/example.file"
+    "hash for `example.file' in test/ of bucket `example'",
+    "./peg hash cos://example/test/example.file"
   )
-  
-  .arguments("[dogeurl]")
+  .option("-s, --sign-url", "Generate hash with OSS signed URL, CHARGED.")
+  .arguments("[location]")
 
-
-  .action(async(e, dogeurl) => {
-    let { configPath } = e as unknown as options;
+  .action(async(e, location) => {
+    let { configPath, signUrl } = e as unknown as options;
     
+    try{
+      if(!(location as string).startsWith("doge://")){
+        console.log(success("[SUCCESS]"), await File.getHashLocal({local: path.resolve(location as string)} as IFile));
+        return;
+      }
+    }catch(e){
+      console.log(error("[ERROR]"), e.message);
+    }
+
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
     }
@@ -38,9 +47,9 @@ export default await new Command()
     try{
       const config = new Config(configPath);
 
-      const [dogeBucket, dogePath] = (dogeurl as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
+      const [dogeBucket, dogePath] = (location as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
       if(dogePath.endsWith("/")){
-        throw new Error(`${dogeurl} refers to a directory.`);
+        throw new Error(`${location} refers to a directory.`);
       }
       if(!dogeBucket){
         throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
@@ -56,9 +65,11 @@ export default await new Command()
       if(files.length !== 1){
         throw new Error("No file found!");
       }
-      console.log(success("[SUCCESS]"), await file.getUrl(files[0], true));
-      console.log(warn("[WARN]"), "This url is CHARGED for CNY0.5/GB/DAY");
-
+      console.log(success("[SUCCESS]"), await file.getHashRemote(files[0], signUrl));
+      
+      if(signUrl){
+        console.log(warn("[WARN]"), "This hash is using sign-url which CHARGED for CNY0.5/GB/DAY");
+      }
     }catch(e){
       console.log(error("[ERROR]"), e.message);
     }

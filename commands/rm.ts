@@ -11,6 +11,8 @@ import { File } from "../core/main/File.ts"
 import { IFile } from "../core/interfaces/IFile.ts";
 import { tty } from "https://deno.land/x/cliffy@v0.25.5/ansi/tty.ts";
 import { ansi } from "https://deno.land/x/cliffy@v0.25.5/ansi/ansi.ts";
+import { Table, Row, Cell } from "https://deno.land/x/cliffy@v0.25.5/table/mod.ts";
+import { Input } from "https://deno.land/x/cliffy@v0.25.5/prompt/mod.ts";
 
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
@@ -33,12 +35,12 @@ export default await new Command()
   
   .arguments("[files...]")
 
-  .option("-f, --force", "Force delete")
+  .option("-r, --recursive", "Delete object recursively")
   .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
   .option("--include <include:string>", "Exclude files that meet the specified criteria")
 
   .action(async(e, ...files) => {
-    let { configPath, exclude, include, recursive, force } = e as unknown as options;
+    let { configPath, exclude, include, recursive } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
@@ -73,13 +75,53 @@ export default await new Command()
         }else{
           tasks = (await file.getFiles(dogePath)).files.filter((file) => !file.key.endsWith("/"));
         }
+        tasks = file.filterFilesRemote(tasks, include, exclude);
 
-      
-      
+        console.log(warn("These files will be deleted!"));
+        const body: Array<Array<string>> = [] as Array<Array<string>>;
+        for(const task of tasks){
+          body.push(Row.from([
+            task.key,
+            task.key.endsWith("/") ? "dir" : "standard",
+            task.time,
+            File.formatBytes(task.size),
+          ]).align("right"))
+        }
+        Table
+        .from([
+          ...body,
+          Row.from([new Cell("Total Objects:").colSpan(3).align("right"), new Cell(tasks.length)]).border(false)
+        ])
+        .header(Row.from(["Key", "Type", "Last Modified", "Size"]).border(false).align("center"))
+        .border(true)
+        .chars({
+          "top": "-",
+          "topMid": "+",
+          "topLeft": "",
+          "topRight": "",
+          "bottom": "-",
+          "bottomMid": "+",
+          "bottomLeft": "",
+          "bottomRight": "",
+          "left": "",
+          "leftMid": "",
+          "mid": "",
+          "midMid": "",
+          "right": "",
+          "rightMid": "",
+          "middle": "│"
+        })
+        .render();
+        const confirm: string = await Input.prompt({
+          message: `Are you sure to delete them? Enter \`delete' to confirm`,
+        });
+        if(confirm !== "delete"){
+          console.log(error("[FAILED]"), `Files will NOT be delete.`);
+          return;
+        }
+        await file.deleteFiles(tasks);
+        console.log(success("[SUCCESS]"), `Files deleted.`);
       }
-
-
-
     }catch(e){
       console.log(error("[ERROR]"), e.message);
     }
