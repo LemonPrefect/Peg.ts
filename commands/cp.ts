@@ -5,8 +5,8 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
 import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
 import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
-import { Config } from "../core/main/Config.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
+import { Config } from "../core/main/Config.ts";
 import download from "./cp/download.ts";
 import upload from "./cp/upload.ts";
 import copy from "./cp/copy.ts";
@@ -17,10 +17,14 @@ interface options{
   exclude: string, 
   include: string, 
   partSize: number, 
-  threadNum: number, 
-  configPath: string, 
+  threadNum: number,  
   recursive: boolean,
-  signUrl: boolean
+  signUrl: boolean,
+
+  configPath: string,
+  endpoint: string,
+  secretId: string,
+  secretKey: string
 }
 
 export default await new Command()
@@ -47,13 +51,13 @@ export default await new Command()
     default: 32
   })
   .option("-r, --recursive", "List objects recursively")
+  .option("-s, --sign-url", "(Download/Sync only) Generate OSS signed URL, CHARGED.")
   .option("--thread-num <threadNum:number>", "(Upload only) Specifies the number of concurrent upload threads", {
     default: 5
   })
-  .option("-s, --sign-url", "(Download/Sync only) Generate OSS signed URL, CHARGED.")
 
   .action(async(e, ...paths) => {
-    let { configPath } = e as unknown as options;
+    let { configPath, endpoint, secretId, secretKey } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
@@ -61,6 +65,8 @@ export default await new Command()
 
     try{
       const config = new Config(configPath);
+      Config.globalOverwrites(config, endpoint, secretId, secretKey);
+
       if(paths.length !== 2){
         throw new Error(`Arg(s) \`${paths}' are invalid.`);
       }

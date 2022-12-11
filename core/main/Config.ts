@@ -56,4 +56,15 @@ export class Config{
   }
 
   public setDogeEndpoint = (protocol = "https", endpoint = "api.dogecloud.com") => this.service.setDogeEndpoint(protocol, endpoint)
+
+  public static globalOverwrites(config:Config, endpoint: string | undefined, secretId: string | undefined, secretKey: string | undefined){
+    if(endpoint){
+      config.setDogeEndpoint(config.getConfig().protocol, endpoint);
+    }
+    if(secretId && secretKey){
+      config.setCredentials(secretId, secretKey);
+    }
+    return config;
+  }
+
 }

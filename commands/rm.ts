@@ -5,7 +5,6 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
 import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
 import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
-import { Config } from "../core/main/Config.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
 import { File } from "../core/main/File.ts"
 import { IFile } from "../core/interfaces/IFile.ts";
@@ -13,16 +12,20 @@ import { tty } from "https://deno.land/x/cliffy@v0.25.5/ansi/tty.ts";
 import { ansi } from "https://deno.land/x/cliffy@v0.25.5/ansi/ansi.ts";
 import { Table, Row, Cell } from "https://deno.land/x/cliffy@v0.25.5/table/mod.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.5/prompt/mod.ts";
-
+import { Config } from "../core/main/Config.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 interface options{
-  configPath: string,
   exclude: string, 
   include: string,
   force: boolean,
-  recursive: boolean
+  recursive: boolean,
+
+  configPath: string,
+  endpoint: string,
+  secretId: string,
+  secretKey: string
 }
 
 export default await new Command()
@@ -30,17 +33,17 @@ export default await new Command()
   .description("Remove objects")
   .example(
     "Remove all files in test/ of bucket `example'",
-    "./peg rm cos://example/test/ -r"
+    "./peg rm doge://example/test/ -r"
   )
   
-  .arguments("[files...]")
+  .arguments("[paths...]")
 
-  .option("-r, --recursive", "Delete object recursively")
   .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
   .option("--include <include:string>", "Exclude files that meet the specified criteria")
+  .option("-r, --recursive", "Delete object recursively")
 
-  .action(async(e, ...files) => {
-    let { configPath, exclude, include, recursive } = e as unknown as options;
+  .action(async(e, ...paths) => {
+    let { exclude, include, recursive, configPath, endpoint, secretId, secretKey } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
@@ -48,8 +51,9 @@ export default await new Command()
 
     try{
       const config = new Config(configPath);
-      
-      for(const dogeurl of files){
+      Config.globalOverwrites(config, endpoint, secretId, secretKey);
+
+      for(const dogeurl of paths){
         const [dogeBucket, dogePath] = (dogeurl as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
         if(!dogeBucket){
           throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);

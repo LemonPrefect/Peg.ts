@@ -18,11 +18,15 @@ const bars = new progress.MultiProgressBar({
 });
 
 interface options{
-  configPath: string,
   exclude: string, 
   include: string,
   recursive: boolean,
-  force: boolean
+  force: boolean,
+
+  configPath: string,
+  endpoint: string,
+  secretId: string,
+  secretKey: string
 }
 
 export default await new Command()
@@ -38,13 +42,14 @@ export default await new Command()
   )
   .arguments("[paths...]")
 
-  .option("-r, --recursive", "Move objects recursively")
-  .option("-f, --force", "Move file overwritely")
+
   .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
+  .option("-f, --force", "Move file overwritely")
   .option("--include <include:string>", "Exclude files that meet the specified criteria")
+  .option("-r, --recursive", "Move objects recursively")
 
   .action(async(e, ...paths) => {
-    let { configPath, exclude, include, recursive, force } = e as unknown as options;
+    let { exclude, include, recursive, force, configPath, endpoint, secretId, secretKey } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
@@ -52,6 +57,8 @@ export default await new Command()
 
     try{
       const config = new Config(configPath);
+      Config.globalOverwrites(config, endpoint, secretId, secretKey);
+
       if(paths.length !== 2 || !paths[0].startsWith("doge://") || !paths[1].startsWith("doge://")){
         throw new Error(`Arg(s) \`${paths}' are invalid.`);
       }

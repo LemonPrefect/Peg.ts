@@ -214,10 +214,3 @@ export class FileService extends DogeService{
     return hash.toString();
   }
 }
-
-// const config = new ConfigService(`C:\\Users\\lenovo\\.peg.config.yaml`);
-// const file = new FileService(config, config.getBucket("imagebutter")!);
-
-// const dFile = (await file.getFilesInfo(["/index.html"]))[0];
-// dFile.local = "G:\\2020110321160453386.png";
-// console.log(await file.calculateHash(dFile))

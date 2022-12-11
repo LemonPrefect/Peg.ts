@@ -41,7 +41,7 @@ export class ConfigService{
     this.config.buckets.push(bucket);
   }
 
-  public getBucket(alias: string): IBucket | undefined{ ///TODO: Filter
+  public getBucket(alias: string): IBucket | undefined{
     for(const bucket of this.config.buckets){
       if(bucket.alias === alias){
         return bucket;

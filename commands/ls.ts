@@ -5,17 +5,27 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
 import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
 import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
-import { Config } from "../core/main/Config.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
 import { Table, Row, Cell } from "https://deno.land/x/cliffy@v0.25.5/table/mod.ts";
 import { tty } from "https://deno.land/x/cliffy@v0.25.5/ansi/tty.ts";
 import { ansi } from "https://deno.land/x/cliffy@v0.25.5/ansi/ansi.ts";
+import { Config } from "../core/main/Config.ts";
 import { File } from "../core/main/File.ts"
 import { IFile } from "../core/interfaces/IFile.ts";
 
-
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
+export interface options{
+  exclude: string, 
+  include: string, 
+  limit: number,
+  recursive: boolean,
+
+  configPath: string,
+  endpoint: string,
+  secretId: string,
+  secretKey: string
+}
 
 export default await new Command()
   .usage("<bucket-uri> [flags]")
@@ -25,21 +35,23 @@ export default await new Command()
     "./peg ls doge://examplebucket/test/ -r"
   )
   
-  .arguments("[dogeurl: string]")
+  .arguments("[location:string]")
   
-  .option("-r, --recursive", "List objects recursively")
   .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
   .option("--include <include:string>", "List files that meet the specified criteria")
   .option("--limit <limit:integer>", "Limit the number of objects listed(0~1000)")
+  .option("-r, --recursive", "List objects recursively")
   
-  .action(async(e, dogeurl) => {
-    let { exclude, include, limit, configPath, recursive } = e as unknown as {exclude: string, include: string, limit: number, configPath: string, recursive: boolean};
+  .action(async(e, location) => {
+    let { exclude, include, limit, recursive, configPath, endpoint, secretId, secretKey } = e as unknown as options;
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
     }
     try{
       const config = new Config(configPath);
-      if(!dogeurl){
+      Config.globalOverwrites(config, endpoint, secretId, secretKey);
+
+      if(!location){
         console.log("Buckets: ");
         const body: Array<Array<string>> = [];
         for(const bucket of config.getConfig().buckets){
@@ -52,7 +64,7 @@ export default await new Command()
         .render();
         return;
       }
-      let [dogeBucket, dogePath] = (dogeurl as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
+      let [dogeBucket, dogePath] = (location as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
 
       if(!dogePath){
         dogePath = "";

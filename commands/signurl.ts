@@ -10,11 +10,13 @@ import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
 import { File } from "../core/main/File.ts"
 import { IFile } from "../core/interfaces/IFile.ts";
 
-
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 interface options{
-  configPath: string
+  configPath: string,
+  endpoint: string,
+  secretId: string,
+  secretKey: string
 }
 
 export default await new Command()
@@ -22,14 +24,13 @@ export default await new Command()
   .description("(CHARGED) Query sign url for 10s")
   .example(
     "sign url for `example.file' in test/ of bucket `example'",
-    "./peg signurl cos://example/test/example.file"
+    "./peg signurl doge://example/test/example.file"
   )
   
-  .arguments("[dogeurl]")
+  .arguments("<location:string>")
 
-
-  .action(async(e, dogeurl) => {
-    let { configPath } = e as unknown as options;
+  .action(async(e, location) => {
+    let { configPath, endpoint, secretId, secretKey } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
@@ -37,10 +38,11 @@ export default await new Command()
 
     try{
       const config = new Config(configPath);
+      Config.globalOverwrites(config, endpoint, secretId, secretKey);
 
-      const [dogeBucket, dogePath] = (dogeurl as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
+      const [dogeBucket, dogePath] = (location as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
       if(dogePath.endsWith("/")){
-        throw new Error(`${dogeurl} refers to a directory.`);
+        throw new Error(`${location} refers to a directory.`);
       }
       if(!dogeBucket){
         throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);

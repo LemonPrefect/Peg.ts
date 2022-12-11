@@ -13,6 +13,16 @@ import { Config } from "../core/main/Config.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
+export interface options{
+  region: string, 
+  level: string,
+  
+  configPath: string,
+  endpoint: string,
+  secretId: string,
+  secretKey: string
+}
+
 export default await new Command()
   .usage("<bucket-alias> [flags]")
   .description("Create bucket")
@@ -24,23 +34,24 @@ export default await new Command()
   .type("region", new EnumType(["ap-shanghai", "ap-beijing", "ap-guangzhou", "ap-chengdu"]))
   .type("level", new EnumType(["standard", "basic"]))
 
+  .option("-l, --level <level:level>", "Bucket type", {
+    required: true
+  })
   .option("-r, --region <region:region>", "Region", {
     default: "ap-chengdu",
       required: true
-  })
-  .option("-l, --level <level:level>", "Bucket type", {
-    required: true
   })
 
   .arguments("<alias:string>")
 
   .action(async(e, alias) => {
-    let { region, level, configPath } = e as unknown as {region: string, level: string, configPath: string};
+    let { region, level, configPath, endpoint, secretId, secretKey } = e as unknown as options;
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
     }
     try{
       const config = new Config(configPath);
+      Config.globalOverwrites(config, endpoint, secretId, secretKey);
       const bucket = new Bucket(config.getService());
       await bucket.createBucket(alias, region, level);
       const buckets: Array<IBucket> = await bucket.getBuckets();

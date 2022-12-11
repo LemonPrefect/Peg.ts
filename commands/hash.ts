@@ -5,17 +5,20 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
 import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
 import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
-import { Config } from "../core/main/Config.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
+import { Config } from "../core/main/Config.ts";
 import { File } from "../core/main/File.ts"
 import { IFile } from "../core/interfaces/IFile.ts";
-
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 interface options{
+  signUrl: boolean,
+
   configPath: string,
-  signUrl: boolean
+  endpoint: string,
+  secretId: string,
+  secretKey: string
 }
 
 export default await new Command()
@@ -26,10 +29,10 @@ export default await new Command()
     "./peg hash cos://example/test/example.file"
   )
   .option("-s, --sign-url", "Generate hash with OSS signed URL, CHARGED.")
-  .arguments("[location]")
+  .arguments("<location:string>")
 
   .action(async(e, location) => {
-    let { configPath, signUrl } = e as unknown as options;
+    let { signUrl, configPath, endpoint, secretId, secretKey } = e as unknown as options;
     
     try{
       if(!(location as string).startsWith("doge://")){
@@ -46,6 +49,7 @@ export default await new Command()
 
     try{
       const config = new Config(configPath);
+      Config.globalOverwrites(config, endpoint, secretId, secretKey);
 
       const [dogeBucket, dogePath] = (location as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
       if(dogePath.endsWith("/")){
