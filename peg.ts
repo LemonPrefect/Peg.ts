@@ -47,7 +47,7 @@ await new Command()
  * [√√] 上传下载或拷贝文件 - cp --meta ?
  * [x] 同步上传下载或拷贝文件 - sync
  * [√√] 删除文件 - rm
- * 获取文件哈希值 - hash -  crc
+ * [√√] 获取文件哈希值 - hash -  crc
  * [x] 列出分块上传中产生的碎片 - lsparts - s3 处理
  * [x] 清理碎片 - abort - s3 处理
  * [x] 取回归档文件 - restore - 无归档
