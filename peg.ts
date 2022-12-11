@@ -5,6 +5,7 @@ import mb from "./commands/mb.ts";
 import rb from "./commands/rb.ts";
 import cp from "./commands/cp.ts";
 import config from "./commands/config/config.ts";
+import signurl from "./commands/signurl.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -29,6 +30,7 @@ await new Command()
   .command("mb", mb)
   .command("rb", rb)
   .command("cp", cp)
+  .command("signurl", signurl)
   .parse(Deno.args)
 
 
@@ -39,14 +41,14 @@ await new Command()
  * [x] 存储桶标签 - bucket-tagging - 无标签
  * [√√] 查询存储桶或文件列表 - ls
  * [x] 获取不同类型文件的统计信息 - du - 无存档
- * [√√] 上传下载或拷贝文件 - cp
- * [x] 同步上传下载或拷贝文件 - sync - 没有人知道 DogeCloud 的哈希怎么算的 w(ﾟДﾟ)w
+ * [√√] 上传下载或拷贝文件 - cp --meta ?
+ * 同步上传下载或拷贝文件 - sync
  * 删除文件 - rm
- * [x] 获取文件哈希值 - hash - 没有人知道 DogeCloud 的哈希怎么算的 w(ﾟДﾟ)w
+ * [x] 获取文件哈希值 - hash -  crc
  * [x] 列出分块上传中产生的碎片 - lsparts - s3 处理
  * [x] 清理碎片 - abort - s3 处理
  * [x] 取回归档文件 - restore - 无归档
- * 获取预签名 URL - signurl
+ * [√√] 获取预签名 URL - signurl
  * 移动文件 - mv
  */
 

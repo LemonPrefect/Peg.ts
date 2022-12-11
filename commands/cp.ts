@@ -11,7 +11,6 @@ import download from "./cp/download.ts";
 import upload from "./cp/upload.ts";
 import copy from "./cp/copy.ts";
 
-
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 interface options{

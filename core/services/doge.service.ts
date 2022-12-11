@@ -13,7 +13,7 @@ export class DogeService{
     this.config = this.configService.getConfig();
   }
 
-  private compact(data: Record<string, string | number> | Array<string | number> ): string{
+  private compact(data: Record<string, string | number> | Array<string | number>): string{
     const result: Array<string> = [];
     for (const [k, v] of Object.entries(data)){
       result.push(`${k}=${encodeURIComponent(v.toString())}`);
@@ -37,8 +37,7 @@ export class DogeService{
         "Authorization": `TOKEN ${this.config.secretId}:${this.sign(signPath, data, isJson)}`,
         "Content-Type": isJson ? "application/json" : "application/x-www-form-urlencoded"
       },
-      data: isJson ? data : this.compact(data) // when EMPTY, KEEP as `{}'. Don't ask me why, ask Dogecloud for why they needed this.
+      data: isJson ? data : this.compact(data) // when EMPTY, KEEP as `{}' for POST is actually convinient and no 405 will be present.
     })
   }
 }
-

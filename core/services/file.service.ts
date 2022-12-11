@@ -3,6 +3,10 @@ import * as base64url from "https://denopkg.com/chiefbiiko/base64@master/base64u
 import * as base64 from "https://denopkg.com/chiefbiiko/base64/mod.ts";
 import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
 import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
+import axiod from "https://deno.land/x/axiod@0.26.2/mod.ts";
+import * as crc64 from "npm:crc64-ecma182.js@1.0.0/crc64_ecma182.js"
+import { Buffer } from "https://deno.land/std@0.167.0/node/buffer.ts";
+import { iterateReader } from "https://deno.land/std@0.162.0/streams/conversion.ts";
 import { IBucket } from "../interfaces/IBucket.ts";
 import { DogeService } from "./doge.service.ts";
 import { IFile } from "../interfaces/IFile.ts";
@@ -131,6 +135,7 @@ export class FileService extends DogeService{
     const res = await fetch(sign ? (await this.getSignUrl(file)).url : this.getUrl(file));
     const pipe = await Deno.open(fullpath, { create: true, write: true });
     await res.body?.pipeTo(pipe.writable);
+    Deno.close(pipe.rid);
   }
 
   public async setFileMime(files: Array<IFile>, mime: string){
@@ -172,13 +177,47 @@ export class FileService extends DogeService{
       "key": base64.fromUint8Array(new TextEncoder().encode(file.key))
     }, {}));
     return {url: response.data.data.url, tip: response.data.data.tips ?? ""}
+  }
 
+  /** COST CNY 0.5/GB/day */
+  public async getSignHash(file: IFile): Promise<string>{
+    const url = (await this.getSignUrl(file)).url;
+    const headers: Headers = (await axiod.get(url, {
+      headers: {
+        "Range": " bytes=0-0"
+      }
+    })).headers;
+    return headers.get("x-cos-hash-crc64ecma") ?? "";
+  }
+
+  public async getHash(file: IFile): Promise<string>{
+    const url = this.getUrl(file);
+    const headers: Headers = (await axiod.get(url, {
+      headers: {
+        "Range": " bytes=0-0"
+      }
+    })).headers;
+    return headers.get("x-cos-hash-crc64ecma") ?? "";
+  }
+
+  public async calculateHash(file: IFile){
+    if(!file.local){
+      throw new Error(`File \`${file.key}' local path MISSING.`);
+    }
+
+    let hash = 0;
+    const pipe = await Deno.open(file.local);
+    for await (const chunk of iterateReader(pipe)) {
+      hash = crc64.crc64(Buffer.from(chunk), hash); 
+    }
+    Deno.close(pipe.rid);
+    return hash.toString();
   }
 }
 
 // const config = new ConfigService(`C:\\Users\\lenovo\\.peg.config.yaml`);
 // const file = new FileService(config, config.getBucket("imagebutter")!);
 
-// // const dFile = (await file.getFilesInfo(["/index.html"]))[0];
-// // dFile.local = "./a.html";
-// file.hashFile({local: "./a.html"} as IFile)
+// const dFile = (await file.getFilesInfo(["/index.html"]))[0];
+// dFile.local = "G:\\2020110321160453386.png";
+// console.log(await file.calculateHash(dFile))

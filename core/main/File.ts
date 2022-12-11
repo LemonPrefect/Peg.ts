@@ -50,6 +50,10 @@ export class File{
     return files.filter((file) => new RegExp(include, "i").test(file.local!) && !new RegExp(exclude, "i").test(file.local!));
   }
 
+  public async getUrl(file: IFile, sign = false){
+    return sign ? (await this.service.getSignUrl(file)).url : this.service.getUrl(file);
+  }
+
   public static formatBytes(bytes: number, decimals = 2) {
     if (!+bytes) return '0 B';
     const k = 1024;

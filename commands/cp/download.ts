@@ -3,6 +3,7 @@ import { tty } from "https://deno.land/x/cliffy@v0.25.5/ansi/tty.ts";
 import { ansi } from "https://deno.land/x/cliffy@v0.25.5/ansi/ansi.ts";
 import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
 import * as progress from "https://deno.land/x/progress@v1.3.4/mod.ts";
+import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
@@ -11,6 +12,7 @@ const bars = new progress.MultiProgressBar({
   title: "Downloading files",
   display: "[:bar] :text :percent :time :completed/:total"
 });
+const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 
 export default async function download(config: Config, paths: Array<string>, options: any){
@@ -55,6 +57,9 @@ export default async function download(config: Config, paths: Array<string>, opt
     }
   }
 
+  if(options.signUrl){
+    console.log(warn("[WARN]"), "This url is CHARGED for CNY0.5/GB/DAY");
+  }
   for(const task of tasks){
     let size;
     try{
