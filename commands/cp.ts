@@ -21,6 +21,7 @@ interface options{
   recursive: boolean,
   signUrl: boolean,
   sync: boolean,
+  meta: Array<string>
 
   configPath: string,
   secretId: string,
@@ -47,6 +48,9 @@ export default await new Command()
 
   .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
   .option("--include <include:string>", "Exclude files that meet the specified criteria")
+  .option("--meta <meta:string>", "Set the meta information of the file", {
+    collect: true
+  })
   .option("--part-size <partSize:number>", "(Upload only) Specifies the block size(MB)", {
     default: 32
   })
@@ -58,7 +62,7 @@ export default await new Command()
   })
 
   .action(async(e, ...paths) => {
-    let { configPath, secretId, secretKey } = e as unknown as options;
+    let { configPath, secretId, secretKey, meta } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
