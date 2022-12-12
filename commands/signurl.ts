@@ -1,5 +1,5 @@
 /** 获取预签名 URL - signurl
- * ./coscli signurl doge://<bucketAlias>/<key> [flag]
+ * ./coscli signurl cos://<bucketAlias>/<key> [flag]
  * https://tencentcloud.com/zh/document/product/436/43263
  */
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";

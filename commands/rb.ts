@@ -1,5 +1,5 @@
 /** 删除存储桶 - rb
- * ./coscli rb doge://<BucketName-APPID> -r <Region> [flag]
+ * ./coscli rb cos://<BucketName-APPID> -r <Region> [flag]
  * https://cloud.tencent.com/document/product/436/63667
  */
 import { Command, EnumType } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";

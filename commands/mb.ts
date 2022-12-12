@@ -1,5 +1,5 @@
 /** 创建存储桶 - mb
- * ./coscli mb doge://<BucketName-APPID> -r <Region> [flag]
+ * ./coscli mb cos://<BucketName-APPID> -r <Region> [flag]
  * https://cloud.tencent.com/document/product/436/63145
  */
 import { Command, EnumType } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";

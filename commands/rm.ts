@@ -1,5 +1,5 @@
 /** 删除文件 - rm
- * ./coscli rm doge://<bucketAlias>[/prefix/] [doge://<bucket-name>[/prefix/]...] [flag]
+ * ./coscli rm cos://<bucketAlias>[/prefix/] [cos://<bucket-name>[/prefix/]...] [flag]
  * https://www.tencentcloud.com/zh/document/product/436/43258
  */
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
