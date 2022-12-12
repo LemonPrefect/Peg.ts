@@ -65,12 +65,17 @@ export default async function upload(config: Config, paths: Array<string>, optio
 
   let metas: Record<string, string> = {} as Record<string, string>;
   if(options.meta){
+    let raw = ["Cache-Control", "Content-Disposition", "Content-Encoding", "Content-Type", "Expires", "Expect"];  
     for(const meta of options.meta){
       const [k, v] = meta.split(":");
       if(!k || !v){
         throw new Error(`Meta ${meta} is invalid.`);
       }
-      metas[`x-cos-meta-${k}`] = v;
+      if(raw.includes(k)){
+        metas[k.replace("-", "")] = v;
+      }else{
+        metas[`x-cos-meta-${k}`] = v;
+      }
     }
   }
   return await file.uploadFiles(files, options.partSize, options.threadNum, metas, uploading);
