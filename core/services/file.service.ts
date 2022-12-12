@@ -140,11 +140,13 @@ export class FileService extends DogeService{
     }
     const res = await fetch(sign ? (await this.getSignUrl(file)).url : await this.getUrl(file));
     const pipe = await Deno.open(fullpath, { create: true, write: true });
-    for await (const chunk of res.body!) {
+    if(!res.body){
+      throw new Error(`File ${file.key} returns ${res.status} with no body.`);
+    }
+    for await (const chunk of res.body!){
       pipe.writeSync(chunk);
     }
     Deno.close(pipe.rid);
-    
   }
 
   public async setFileMime(files: Array<IFile>, mime: string){

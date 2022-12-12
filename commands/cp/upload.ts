@@ -68,7 +68,7 @@ export default async function upload(config: Config, paths: Array<string>, optio
 
 function uploading(file: string, index: number, total: number, complete: number){
   if(complete === 100){
-    complete-=0.0001; // For the progress don't `end'.
+    complete -= 0.0001; // For the progress don't `end'.
   }
   bars.render([
     { completed: complete, total: 100, text: file },

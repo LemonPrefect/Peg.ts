@@ -66,6 +66,9 @@ export default async function download(config: Config, paths: Array<string>, opt
       tty.cursorUp(1);
     });
   }
+  if(files.length === 0){
+    throw new Error("No file found.");
+  }
   if(options.signUrl){
     console.log(warn("[WARN]"), "This url is CHARGED for CNY0.5/GB/DAY");
   }
