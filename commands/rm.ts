@@ -29,7 +29,7 @@ interface options{
 }
 
 export default await new Command()
-  .usage("[flags]")
+  .usage("<source_path> <destination_path> [option]")
   .description("Remove objects")
   .example(
     "Remove all files in test/ of bucket `example'",

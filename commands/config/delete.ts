@@ -12,7 +12,7 @@ import { Config } from "../../core/main/Config.ts";
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 export default await new Command()
-  .usage("[flags]")
+  .usage("[option]")
   .description("Used to delete an existing bucket")
   .example("Format", "./peg config delete -a <alias> [-c <config-file-path>]")
   .example("Delete an existing bucket", "./peg config delete -a example")

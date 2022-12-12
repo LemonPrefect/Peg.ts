@@ -28,7 +28,7 @@ export interface options{
 }
 
 export default await new Command()
-  .usage("<bucket-uri> [flags]")
+  .usage("[bucket-uri] [option]")
   .description("List buckets or objects")
   .example(
     "List file recursively",

@@ -30,7 +30,7 @@ interface options{
 }
 
 export default await new Command()
-  .usage("<source_path> <destination_path> [flags]")
+  .usage("<source_path> <destination_path> [option]")
   .description("Move objects")
   .example(
     "Move file",

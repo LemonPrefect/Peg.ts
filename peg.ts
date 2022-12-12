@@ -13,10 +13,10 @@ await new Command()
 
   .name("peg")
   .description("Welcome to use peg, a third-party open source DogeCloud OSS CLI.")
-  .version("0.0.221207.1")
-  .usage("[flags/command]")
+  .version("0.0.221207.2")
+  .usage("[option/command]")
   .group("Global Options")
-  .globalOption("-c, --config-path <configPath:string>", "config file path(default is $HOME/.cos.yaml)")
+  .globalOption("-c, --config-path <configPath:string>", "config file path(default is $HOME/.peg.config.yaml)")
   .globalOption("-e, --endpoint <endpoint:string>", "config endpoint")
   .globalOption("-i, --secret-id <secretId:string>", "config secretId", {
     depends: ["secret-key"]
@@ -45,7 +45,7 @@ await new Command()
  * [√√] 查询存储桶或文件列表 - ls
  * [x] 获取不同类型文件的统计信息 - du - 无存档
  * [√√] 上传下载或拷贝文件 - cp --meta ?
- * [x] 同步上传下载或拷贝文件 - sync
+ * [√√] 同步上传下载或拷贝文件 - sync
  * [√√] 删除文件 - rm
  * [√√] 获取文件哈希值 - hash -  crc
  * [x] 列出分块上传中产生的碎片 - lsparts - s3 处理

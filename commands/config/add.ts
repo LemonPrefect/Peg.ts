@@ -12,7 +12,7 @@ import { Config } from "../../core/main/Config.ts";
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 export default await new Command()
-  .usage("[flags]")
+  .usage("[option]")
   .description("Used to add a new bucket configuration")
   .example("Format", "./peg config add -a <alias> [-c <config-file-path>]")
   .example("Add bucket", "./peg config add -a example")

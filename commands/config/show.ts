@@ -12,7 +12,7 @@ import { Config } from "../../core/main/Config.ts";
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 export default await new Command()
-  .usage("[flags]")
+  .usage("[option]")
   .description("Prints information from a specified configuration file")
   .example("Format", "./peg config show [-c <config-file-path>]")
   .example("Show all info", "./peg config show")

@@ -24,7 +24,7 @@ export interface options{
 }
 
 export default await new Command()
-  .usage("<bucket-alias> [flags]")
+  .usage("<bucket-alias> [option]")
   .description("Create bucket")
   .example(
     "Create standard bucket `examplebucket' in chengdu",

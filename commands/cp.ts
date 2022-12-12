@@ -1,5 +1,5 @@
 /** 上传下载或拷贝文件 - cp
- * ./coscli cp <source_path> <destination_path> [flags]
+ * ./coscli cp <source_path> <destination_path> [option]
  * https://cloud.tencent.com/document/product/436/63669
  */
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
@@ -29,7 +29,7 @@ interface options{
 }
 
 export default await new Command()
-  .usage("<source_path> <destination_path> [flags]")
+  .usage("<source_path> <destination_path> [option]")
   .description("Upload, download or copy objects")
   .example(
     "Upload",

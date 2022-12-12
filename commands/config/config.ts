@@ -7,7 +7,7 @@ import init from "./init.ts";
 
 
 export default await new Command()
-  .usage("[command] [flag]")
+  .usage("[command] [option]")
   .description("Init or edit config file")
   .command("add", add)
   .command("delete", _delete)

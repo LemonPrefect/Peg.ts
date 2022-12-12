@@ -22,7 +22,7 @@ interface options{
 }
 
 export default await new Command()
-  .usage("[flags]")
+  .usage("<path> [option]")
   .description("Calculate local file's hash-code or show cos file's hash-code")
   .example(
     "hash for `example.file' in test/ of bucket `example'",
