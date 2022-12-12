@@ -55,3 +55,8 @@ await new Command()
  * [√√] 移动文件 - mv
  */
 
+/**
+ * checksync --url
+ * info 
+ * meta
+ */
