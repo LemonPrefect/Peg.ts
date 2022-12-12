@@ -21,12 +21,13 @@ export class DogeService{
     return result.join("&");
   }
   
-  private sign(path: string, data: Record<string, string | number> | Array<string | number> , isJson = true): string{
-    const body: string = isJson ? JSON.stringify(data) : this.compact(data);
+  private sign(path: string, data: Record<string, string | number | unknown> | Array<string | number>, isJson = true): string{
+    const body: string = isJson ? JSON.stringify(data) : this.compact(data as Record<string, string | number>);
     return hmac("sha1", this.config.secretKey, `${path}\n${body}`, "utf8", "hex").toString();
   }
 
-  protected async query(path: string, params: Record<string, string | number> = {}, data: Record<string, string | number> | Array<string | number> = {}, isJson = true): Promise<IAxiodResponse>{
+  // Unknown will only be use when JSON is the structure.
+  protected async query(path: string, params: Record<string, string | number> = {}, data: Record<string, string | number | unknown> | Array<string | number> = {}, isJson = true): Promise<IAxiodResponse>{
     const signPath = Object.keys(params).length === 0 ? `${path}` : `${path}?${this.compact(params)}`;
     return await axiod({
       baseURL: `${this.config.protocol}://${this.config.portal}`,
@@ -37,7 +38,7 @@ export class DogeService{
         "Authorization": `TOKEN ${this.config.secretId}:${this.sign(signPath, data, isJson)}`,
         "Content-Type": isJson ? "application/json" : "application/x-www-form-urlencoded"
       },
-      data: isJson ? data : this.compact(data) // when EMPTY, KEEP as `{}' for POST is actually convinient and no 405 will be present.
+      data: isJson ? data : this.compact(data as Record<string, string | number>) // when EMPTY, KEEP as `{}' for POST is actually convinient and no 405 will be present.
     })
   }
 }

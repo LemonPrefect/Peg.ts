@@ -157,7 +157,7 @@ export class FileService extends DogeService{
     Deno.close(pipe.rid);
   }
 
-  public async setFileMime(files: Array<IFile>, mime: string){
+  public async setFilesMime(files: Array<IFile>, mime: string){
     const keys: Array<string> = [] as Array<string>;
     for(const file of files){
       keys.push(file.key);
@@ -166,6 +166,20 @@ export class FileService extends DogeService{
       "bucket": this.bucket.alias,
       "mime": base64url.fromUint8Array(new TextEncoder().encode(mime))
     }, keys));
+  }
+
+  public async setFileHeader(file: IFile, headers: Array<Record<string, string>>){
+    const parsedHeaders: Array<{key: string, value: string}> = [];
+    for(const header of headers){
+      parsedHeaders.push({ ///TODO: 优化
+        key: header[0],
+        value: header[1]
+      })
+    }
+    requestErrorHandler(await this.query("/oss/file/mime.json", {
+      "bucket": this.bucket.alias,
+      "key": base64url.fromUint8Array(new TextEncoder().encode(file.key))
+    }, {"storageClass": 0, "headers": parsedHeaders}));
   }
 
   public async getFilesInfo(keys: Array<string>): Promise<Array<IFile>>{
@@ -206,7 +220,7 @@ export class FileService extends DogeService{
     const url = (await this.getSignUrl(file)).url;
     const headers: Headers = (await axiod.get(url, {
       headers: {
-        "Range": " bytes=0-0"
+        "Range": "bytes=0-0"
       }
     })).headers;
     return headers.get("x-cos-hash-crc64ecma") ?? "";
@@ -216,7 +230,7 @@ export class FileService extends DogeService{
     const url = await this.getUrl(file);
     const headers: Headers = (await axiod.get(url, {
       headers: {
-        "Range": " bytes=0-0"
+        "Range": "bytes=0-0"
       }
     })).headers;
     return headers.get("x-cos-hash-crc64ecma") ?? "";
@@ -234,5 +248,20 @@ export class FileService extends DogeService{
     }
     Deno.close(pipe.rid);
     return hash.toString();
+  }
+
+  public async getSyncTime(file: IFile): Promise<string | undefined>{
+    const url = await this.getUrl(file);
+    const headers: Headers = (await axiod.get(url, {
+      headers: {
+        "Range": "bytes=0-0"
+      }
+    })).headers;
+    const time = headers.get("last-modified") ?? "";
+    if(time !== ""){
+      const date = new Date(time);
+      return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+    }
+    return undefined;
   }
 }
