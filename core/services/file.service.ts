@@ -54,7 +54,7 @@ export class FileService extends DogeService{
     return {files: files, continue: response.data.data.continue ?? undefined}
   }
 
-  public async uploadFiles(files: Array<IFile>, chunkSize = 32, threadLimit = 5, callback: Function | undefined = undefined){
+  public async uploadFiles(files: Array<IFile>, chunkSize = 32, threadLimit = 5, metas = {}, callback: Function | undefined = undefined){
     const response = requestErrorHandler(await this.query("/oss/upload/auth.json", {}, {
       "scope": `${this.bucket.alias}:*`,
       "deadline": Math.round(new Date().getTime() / 1000) + 3600
@@ -75,6 +75,7 @@ export class FileService extends DogeService{
         Region: this.bucket.region,
         Key: `${preprefix}${file.key}`,
         FilePath: file.local!,
+        ...metas,
         onTaskStart: (taskInfo: COS.Task) => {
           if(callback){
             callback(`${file.local}=>${preprefix}${file.key}`, files.indexOf(file), files.length, 0);
