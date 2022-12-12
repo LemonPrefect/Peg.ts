@@ -28,7 +28,9 @@ export class FileService extends DogeService{
 
   public async setBucket(bucket: IBucket): Promise<FileService>{
     this.bucket = bucket;
-    this.bucketDomain = await this.bucketService.getBucketDomain(bucket);
+    try{
+      this.bucketDomain = await this.bucketService.getBucketDomain(bucket);
+    }catch(e){}
     return this;
   }
   
