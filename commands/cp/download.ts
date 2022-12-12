@@ -82,10 +82,9 @@ export default async function download(config: Config, paths: Array<string>, opt
     if(options.sync){
       size = 0;
     }
-    downloading(`${task.key}=>${task.local}`, tasks.indexOf(task), tasks.length, task.size, size);
-    await file.downloadFile(task, options.signUrl); // qps limit!
-    size = fs.lstatSync(task.local!).size;
-    downloading(`${task.key} => ${task.local}`, tasks.indexOf(task) + 1, tasks.length, task.size, size);
+    await file.downloadFile(task, options.signUrl, (e: number, c: number) => {
+      downloading(`${task.key} => ${task.local}`, tasks.indexOf(task) + c, tasks.length, task.size, e);
+    }); // qps limit!
   }
 }
 

@@ -124,7 +124,7 @@ export class FileService extends DogeService{
     }, false));
   }
 
-  public async downloadFile(file: IFile, sign = false){
+  public async downloadFile(file: IFile, sign = false, callback: Function | undefined = undefined){
     if(!file.local){
       throw new Error(`File \`${file.key}' local path MISSING.`);
     }
@@ -143,8 +143,16 @@ export class FileService extends DogeService{
     if(!res.body){
       throw new Error(`File ${file.key} returns ${res.status} with no body.`);
     }
+    let size = 0;
     for await (const chunk of res.body!){
       pipe.writeSync(chunk);
+      size += chunk.length;
+      if(callback && size % 1000 === 0){
+        callback(size, 0);
+      }
+    }
+    if(callback){
+      callback(size, 1);
     }
     Deno.close(pipe.rid);
   }

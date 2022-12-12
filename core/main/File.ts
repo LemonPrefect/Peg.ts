@@ -32,8 +32,8 @@ export class File{
     await this.service.uploadFiles(files, chunkSize, threadLimit, callback);
   }
 
-  public async downloadFile(file: IFile, sign = false){
-    await this.service.downloadFile(file, sign)
+  public async downloadFile(file: IFile, sign = false, callback: Function | undefined = undefined){
+    await this.service.downloadFile(file, sign, callback);
   }
 
   public async moveFile(src: string, dest: string, fromBucket: string, toBucket: string, isForce = false){
