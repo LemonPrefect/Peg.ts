@@ -69,6 +69,7 @@ export default await new Command()
           await bucket.deleteBucket(alias);
           console.log(success("[SUCCESS]"), `Bucket \`${alias}' deleted.`);
           console.log(success("[INFO]"), `Use ./peg config delete ${alias} to delete bucket in config.`);
+          return;
         }
       }
       console.log(error("[FAILED]"), `Bucket \`${alias}' delete FAILED.`);
