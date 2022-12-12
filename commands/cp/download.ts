@@ -47,7 +47,7 @@ export default async function download(config: Config, paths: Array<string>, opt
   }
 
   let tasks: Array<IFile> = [] as Array<IFile>;
-  if(originalFileCount === 1){
+  if(originalFileCount === 1 && !dogePath.endsWith("/")){
     files[0].local = fullpath;
     tasks.push(files[0]);
   }else{
@@ -69,7 +69,6 @@ export default async function download(config: Config, paths: Array<string>, opt
   if(options.signUrl){
     console.log(warn("[WARN]"), "This url is CHARGED for CNY0.5/GB/DAY");
   }
-
   for(const task of tasks){
     let size;
     try{
