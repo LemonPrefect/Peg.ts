@@ -1,5 +1,5 @@
 /** 查询存储桶或文件列表 - ls
- * ./coscli ls [cos://bucketAlias[/prefix/]] [flag]
+ * ./coscli ls [doge://bucketAlias[/prefix/]] [flag]
  * https://cloud.tencent.com/document/product/436/63668
  */
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";

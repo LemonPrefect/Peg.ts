@@ -26,7 +26,7 @@ export default await new Command()
   .description("Calculate local file's hash-code or show cos file's hash-code")
   .example(
     "hash for `example.file' in test/ of bucket `example'",
-    "./peg hash cos://example/test/example.file"
+    "./peg hash doge://example/test/example.file"
   )
   .option("-s, --sign-url", "Generate hash with OSS signed URL, CHARGED")
   .arguments("<location:string>")
