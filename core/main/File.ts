@@ -68,9 +68,12 @@ export class File{
     return FileService.calculateHash(file);
   }
 
-  public async syncFilter(files: Array<IFile>, sign = false){
+  public async syncFilter(files: Array<IFile>, sign = false, callback: Function | undefined = undefined){
     const result: Array<IFile> = [] as Array<IFile>;
     for(const file of files){
+      if(callback){
+        callback(file);
+      }  
       let localHash = "";
       try{
         localHash = await File.getHashLocal(file);

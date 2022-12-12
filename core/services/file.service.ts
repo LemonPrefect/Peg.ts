@@ -77,12 +77,12 @@ export class FileService extends DogeService{
         FilePath: file.local!,
         onTaskStart: (taskInfo: COS.Task) => {
           if(callback){
-            callback(`${file.local} => ${preprefix}${file.key}`, files.indexOf(file), files.length, 0);
+            callback(`${file.local}=>${preprefix}${file.key}`, files.indexOf(file), files.length, 0);
           }
         },
         onProgress: (params: COS.ProgressInfo) => {
           if(callback){
-            callback(`${file.local} => ${preprefix}${file.key}`, files.indexOf(file) + 1, files.length, Math.round(params.percent * 100));
+            callback(`${file.local}=>${preprefix}${file.key}`, files.indexOf(file) + 1, files.length, Math.round(params.percent * 100));
           }
         }
       }, (err: COS.CosError, data: COS.SliceUploadFileResult) => {

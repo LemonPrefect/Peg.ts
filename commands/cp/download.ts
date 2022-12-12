@@ -10,7 +10,7 @@ import { IFile } from "../../core/interfaces/IFile.ts";
 
 const bars = new progress.MultiProgressBar({
   title: "Downloading files",
-  display: "[:bar] :text :percent :time :completed/:total"
+  display: `[:bar] :text :percent :time :completed/:total${ansi.eraseLineEnd.toString()}`,
 });
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -58,7 +58,13 @@ export default async function download(config: Config, paths: Array<string>, opt
   }
 
   if(options.sync){
-    tasks = await file.syncFilter(tasks, options.signUrl === true);
+    console.log(`Sync Hashing...${ansi.eraseLineEnd.toString()}`);
+    tty.cursorUp(1);
+    tasks = await file.syncFilter(tasks, options.signUrl === true, (file: IFile) => {
+      tty.eraseLine;
+      console.log(`Hashing ${file.key}...${ansi.eraseLineEnd.toString()}`);
+      tty.cursorUp(1);
+    });
   }
   if(options.signUrl){
     console.log(warn("[WARN]"), "This url is CHARGED for CNY0.5/GB/DAY");
@@ -74,8 +80,8 @@ export default async function download(config: Config, paths: Array<string>, opt
     if(options.sync){
       size = 0;
     }
-    downloading(`${task.key} => ${task.local}`, tasks.indexOf(task), tasks.length, task.size, size);
-    await file.downloadFile(task, options.signUrl);
+    downloading(`${task.key}=>${task.local}`, tasks.indexOf(task), tasks.length, task.size, size);
+    await file.downloadFile(task, options.signUrl); // qps limit!
     size = fs.lstatSync(task.local!).size;
     downloading(`${task.key} => ${task.local}`, tasks.indexOf(task) + 1, tasks.length, task.size, size);
   }
@@ -85,6 +91,9 @@ function downloading(file: string, index: number,  total: number, size: number, 
   if(complete === 0 && size == 0){ // For empty files not breaking bars.
     complete++;
     size++;
+  }
+  if(complete === size){ // For the progress don't `end'.
+    complete--;
   }
   bars.render([
     { completed: complete, total: size, text: file },
