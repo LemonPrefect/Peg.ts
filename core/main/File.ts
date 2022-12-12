@@ -41,7 +41,7 @@ export class File{
   }
 
   public async deleteFiles(files: Array<IFile>){
-    this.service.deleteFiles(files);
+    await this.service.deleteFiles(files);
   }
 
   public async copyFile(src: string, dest: string, fromBucket: string, toBucket: string, isForce = false){
