@@ -17,14 +17,14 @@ await new Command()
   .usage("[option/command]")
   .group("Global Options")
   .globalOption("-c, --config-path <configPath:string>", "config file path(default is $HOME/.peg.config.yaml)")
-  .globalOption("-e, --endpoint <endpoint:string>", "config endpoint")
+  // .globalOption("-e, --endpoint <endpoint:string>", "config endpoint")
   .globalOption("-i, --secret-id <secretId:string>", "config secretId", {
     depends: ["secret-key"]
   })
   .globalOption("-k, --secret-key <secretKey:string>", "config secretKey", {
     depends: ["secret-id"]
   })
-  .globalOption("-t, --session-token <sessionToken:string>", "config sessionToken")
+  // .globalOption("-t, --session-token <sessionToken:string>", "config sessionToken")
   .command("config", config)
   .command("cp", cp)
   .command("hash", hash)

@@ -18,7 +18,6 @@ export interface options{
   region: string, 
 
   configPath: string,
-  endpoint: string,
   secretId: string,
   secretKey: string
 }
@@ -40,13 +39,13 @@ export default await new Command()
   .arguments("<alias:string>")
 
   .action(async(e, alias) => {
-    let { region, configPath, endpoint, secretId, secretKey } = e as unknown as options;
+    let { region, configPath, secretId, secretKey } = e as unknown as options;
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
     }
     try{
       const config = new Config(configPath);
-      Config.globalOverwrites(config, endpoint, secretId, secretKey);
+      Config.globalOverwrites(config, secretId, secretKey);
 
       const bucket = new Bucket(config.getService());
       const buckets: Array<IBucket> = await bucket.getBuckets();

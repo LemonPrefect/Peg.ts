@@ -14,7 +14,6 @@ const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.
 
 interface options{
   configPath: string,
-  endpoint: string,
   secretId: string,
   secretKey: string
 }
@@ -30,7 +29,7 @@ export default await new Command()
   .arguments("<location:string>")
 
   .action(async(e, location) => {
-    let { configPath, endpoint, secretId, secretKey } = e as unknown as options;
+    let { configPath, secretId, secretKey } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
@@ -38,7 +37,7 @@ export default await new Command()
 
     try{
       const config = new Config(configPath);
-      Config.globalOverwrites(config, endpoint, secretId, secretKey);
+      Config.globalOverwrites(config, secretId, secretKey);
 
       const [dogeBucket, dogePath] = (location as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
       if(dogePath.endsWith("/")){

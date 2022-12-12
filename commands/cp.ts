@@ -23,7 +23,6 @@ interface options{
   sync: boolean,
 
   configPath: string,
-  endpoint: string,
   secretId: string,
   secretKey: string
 }
@@ -59,7 +58,7 @@ export default await new Command()
   })
 
   .action(async(e, ...paths) => {
-    let { configPath, endpoint, secretId, secretKey } = e as unknown as options;
+    let { configPath, secretId, secretKey } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
@@ -67,7 +66,7 @@ export default await new Command()
 
     try{
       const config = new Config(configPath);
-      Config.globalOverwrites(config, endpoint, secretId, secretKey);
+      Config.globalOverwrites(config, secretId, secretKey);
 
       if(paths.length !== 2){
         throw new Error(`Arg(s) \`${paths}' are invalid.`);

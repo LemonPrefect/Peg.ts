@@ -24,7 +24,6 @@ interface options{
   force: boolean,
 
   configPath: string,
-  endpoint: string,
   secretId: string,
   secretKey: string
 }
@@ -49,7 +48,7 @@ export default await new Command()
   .option("-r, --recursive", "Move objects recursively")
 
   .action(async(e, ...paths) => {
-    let { exclude, include, recursive, force, configPath, endpoint, secretId, secretKey } = e as unknown as options;
+    let { exclude, include, recursive, force, configPath, secretId, secretKey } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
@@ -57,7 +56,7 @@ export default await new Command()
 
     try{
       const config = new Config(configPath);
-      Config.globalOverwrites(config, endpoint, secretId, secretKey);
+      Config.globalOverwrites(config, secretId, secretKey);
 
       if(paths.length !== 2 || !paths[0].startsWith("doge://") || !paths[1].startsWith("doge://")){
         throw new Error(`Arg(s) \`${paths}' are invalid.`);

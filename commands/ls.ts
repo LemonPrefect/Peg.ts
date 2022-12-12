@@ -22,7 +22,6 @@ export interface options{
   recursive: boolean,
 
   configPath: string,
-  endpoint: string,
   secretId: string,
   secretKey: string
 }
@@ -43,13 +42,13 @@ export default await new Command()
   .option("-r, --recursive", "List objects recursively")
   
   .action(async(e, location) => {
-    let { exclude, include, limit, recursive, configPath, endpoint, secretId, secretKey } = e as unknown as options;
+    let { exclude, include, limit, recursive, configPath, secretId, secretKey } = e as unknown as options;
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
     }
     try{
       const config = new Config(configPath);
-      Config.globalOverwrites(config, endpoint, secretId, secretKey);
+      Config.globalOverwrites(config, secretId, secretKey);
 
       if(!location){
         console.log("Buckets: ");
