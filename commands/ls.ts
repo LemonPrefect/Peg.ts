@@ -10,6 +10,7 @@ import { Table, Row, Cell } from "https://deno.land/x/cliffy@v0.25.5/table/mod.t
 import { tty } from "https://deno.land/x/cliffy@v0.25.5/ansi/tty.ts";
 import { ansi } from "https://deno.land/x/cliffy@v0.25.5/ansi/ansi.ts";
 import { Config } from "../core/main/Config.ts";
+import { Bucket } from "../core/main/Bucket.ts";
 import { File } from "../core/main/File.ts"
 import { IFile } from "../core/interfaces/IFile.ts";
 
@@ -52,8 +53,10 @@ export default await new Command()
 
       if(!location){
         console.log("Buckets: ");
+        const bucket = new Bucket(config.getService());
+        const buckets = await bucket.getBuckets();
         const body: Array<Array<string>> = [];
-        for(const bucket of config.getConfig().buckets){
+        for(const bucket of buckets){
           body.push([bucket.name, bucket.alias, bucket.region, bucket.endpoint])
         }
         new Table()
