@@ -14,6 +14,10 @@ export class File{
     return await this.service.getFiles(limit, prefix);
   }
 
+  public async getFilesInfo(keys: Array<string>){
+    return await this.service.getFilesInfo(keys);
+  }
+
   public async getFilesRecurse(prefix: string, callback: Function, limit = 1000, store: Array<IFile> = [] as Array<IFile>): Promise<Array<IFile>>{
     const result: Array<IFile> = store;
     const {files, continue: string} = await this.getFiles(prefix);
@@ -89,7 +93,13 @@ export class File{
     return result;
   }
 
-  public static formatBytes(bytes: number, decimals = 2) {
+  public async setFileHeaders(file: IFile, headers: Array<{key: string, value: string | number}>, deleteKeys: Array<string> = [] as Array<string>){
+    const keys: Array<string> = headers.map(e => e.key);
+    headers = [...file.headers.filter(header => !keys.includes(header.key) && !deleteKeys.includes(header.key)), ...headers];
+    await this.service.setFileHeaders(file, headers);
+  }
+
+  public static formatBytes(bytes: number, decimals = 2){
     if (!+bytes) return '0 B';
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;

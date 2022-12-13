@@ -2,7 +2,6 @@
  * ./coscli config set [option]
  * https://cloud.tencent.com/document/product/436/63679
  */
-/** TODO: set portal?? */
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
 import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
 import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
