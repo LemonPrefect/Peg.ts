@@ -59,7 +59,7 @@ export default await new Command()
   })
 
   .action(async(e, ...paths) => {
-    let { configPath, secretId, secretKey, meta } = e as unknown as options;
+    let { configPath, secretId, secretKey } = e as unknown as options;
     
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");

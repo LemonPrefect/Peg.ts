@@ -60,13 +60,13 @@ export default await new Command()
         const file = new File(config.getService(), bucket);
         let files: Array<IFile> = [] as Array<IFile>;
         if(!recursive){
-          files = [...(await file.getFiles(dogePath)).files.filter((file) => !file.key.endsWith("/")), ...files];
+          files = (await file.getFiles(dogePath)).files.filter((file) => !file.key.endsWith("/"));
         }else{
-          files = [...await file.getFilesRecurse(dogePath, (key: string) => {
+          files = await file.getFilesRecurse(dogePath, (key: string) => {
             tty.eraseLine;
             console.log(`Walking ${key}...${ansi.eraseLineEnd.toString()}`);
             tty.cursorUp(1);
-          }), ...files];
+          });
         }
         files = file.filterFilesRemote(files, include, exclude);
         if(files.length === 0){
