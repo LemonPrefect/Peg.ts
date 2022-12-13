@@ -28,7 +28,7 @@ interface options{
 }
 
 export default await new Command()
-  .usage("<source_path> <destination_path> [option]")
+  .usage("<bucket-uri> [option]")
   .description("Remove objects")
   .example(
     "Remove all files in test/ of bucket `example'",

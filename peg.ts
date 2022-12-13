@@ -7,7 +7,9 @@ import cp from "./commands/cp.ts";
 import config from "./commands/config/config.ts";
 import signurl from "./commands/signurl.ts";
 import hash from "./commands/hash.ts";
+import meta from "./commands/meta.ts";
 import rm from "./commands/rm.ts";
+import synccheck from "./commands/synccheck.ts";
 
 await new Command()
 
@@ -30,10 +32,12 @@ await new Command()
   .command("hash", hash)
   .command("ls", ls)
   .command("mb", mb)
+  .command("meta", meta)
   .command("mv", mv)
   .command("rb", rb)
   .command("rm", rm)
   .command("signurl", signurl)
+  .command("synccheck", synccheck)
   .parse(Deno.args)
 
 
@@ -57,6 +61,6 @@ await new Command()
 
 /**
  * checksync --url
- * info 
- * meta
+ * [√√] header 
+ * [√√] meta
  */

@@ -19,7 +19,7 @@ interface options{
 }
 
 export default await new Command()
-  .usage("<path> [option]")
+  .usage("<bucket-uri> [option]")
   .description("(CHARGED) Query sign url for 10s")
   .example(
     "sign url for `example.file' in test/ of bucket `example'",

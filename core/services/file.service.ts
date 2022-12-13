@@ -169,18 +169,11 @@ export class FileService extends DogeService{
     }, keys));
   }
 
-  public async setFileHeader(file: IFile, headers: Array<Record<string, string>>){
-    const parsedHeaders: Array<{key: string, value: string}> = [];
-    for(const header of headers){
-      parsedHeaders.push({ ///TODO: 优化
-        key: header[0],
-        value: header[1]
-      })
-    }
-    requestErrorHandler(await this.query("/oss/file/mime.json", {
+  public async setFileHeaders(file: IFile, headers: Array<{key: string, value: string | number}>){
+    requestErrorHandler(await this.query("/oss/file/config.json", {
       "bucket": this.bucket.alias,
       "key": base64url.fromUint8Array(new TextEncoder().encode(file.key))
-    }, {"storageClass": 0, "headers": parsedHeaders}));
+    }, {"storageClass": 0, "headers": headers}));
   }
 
   public async getFilesInfo(keys: Array<string>): Promise<Array<IFile>>{
@@ -194,7 +187,8 @@ export class FileService extends DogeService{
         hash: file.hash,
         size: file.fsize,
         mime: file.mimeType,
-        time: file.time
+        time: file.time,
+        headers: file.headers
       } as IFile);
     }
     return files;
@@ -261,8 +255,17 @@ export class FileService extends DogeService{
     const time = headers.get("last-modified") ?? "";
     if(time !== ""){
       const date = new Date(time);
-      return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+      return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")} ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;
     }
     return undefined;
   }
 }
+
+// const config = new ConfigService(`C:\\Users\\lenovo\\.peg.config.yaml`);
+// const file = new FileService(config, config.getBucket("imagebutter")!);
+
+// const dFile = (await file.getFilesInfo(["/index.txt"]))[0];
+// // dFile.local = "./a.html";
+// file.setFileHeader(dFile, [
+//   {key: "Content-Type", value: "text/html" },
+// ])
