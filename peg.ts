@@ -15,7 +15,7 @@ await new Command()
 
   .name("peg")
   .description("Welcome to use peg, a third-party open source DogeCloud OSS CLI.")
-  .version("0.0.221207.2")
+  .version("0.0.221213.1")
   .usage("[option/command]")
   .group("Global Options")
   .globalOption("-c, --config-path <configPath:string>", "config file path(default is $HOME/.peg.config.yaml)")
@@ -60,7 +60,7 @@ await new Command()
  */
 
 /**
- * checksync --url
+ * [√√] checksync --url
  * [√√] header 
  * [√√] meta
  */

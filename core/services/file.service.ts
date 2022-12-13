@@ -260,12 +260,3 @@ export class FileService extends DogeService{
     return undefined;
   }
 }
-
-// const config = new ConfigService(`C:\\Users\\lenovo\\.peg.config.yaml`);
-// const file = new FileService(config, config.getBucket("imagebutter")!);
-
-// const dFile = (await file.getFilesInfo(["/index.txt"]))[0];
-// // dFile.local = "./a.html";
-// file.setFileHeader(dFile, [
-//   {key: "Content-Type", value: "text/html" },
-// ])
