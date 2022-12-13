@@ -1,12 +1,4 @@
-import COS from "npm:cos-nodejs-sdk-v5@2.11.18/index.js";
-import * as base64url from "https://denopkg.com/chiefbiiko/base64@master/base64url.ts";
-import * as base64 from "https://denopkg.com/chiefbiiko/base64/mod.ts";
-import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
-import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
-import axiod from "https://deno.land/x/axiod@0.26.2/mod.ts";
-import * as crc64 from "npm:crc64-ecma182.js@1.0.0/crc64_ecma182.js"
-import { Buffer } from "https://deno.land/std@0.167.0/node/buffer.ts";
-import { iterateReader } from "https://deno.land/std@0.162.0/streams/conversion.ts";
+import { COS, base64url, base64, path, fs, axiod, crc64, Buffer, iterateReader } from "../common/lib.ts";
 import { IBucket } from "../interfaces/IBucket.ts";
 import { DogeService } from "./doge.service.ts";
 import { IFile } from "../interfaces/IFile.ts";
@@ -107,7 +99,6 @@ export class FileService extends DogeService{
     }, keys));
   }
     
-  /** SAME AREA LIMITED */
   public async moveFile(src: string, dest: string, fromBucket: string = this.bucket.alias, toBucket: string = this.bucket.alias, isForce = false): Promise<void>{
     requestErrorHandler(await this.query("/oss/file/move.json", {}, {
       "src": base64url.fromUint8Array(new TextEncoder().encode(`${fromBucket}:${src}`)),
@@ -116,7 +107,6 @@ export class FileService extends DogeService{
     }, false));
   }
 
-  /** SAME AREA LIMITED */
   public async copyFile(src: string, dest: string, fromBucket: string, toBucket: string, isForce = false): Promise<void>{
     requestErrorHandler(await this.query("/oss/file/copy.json", {}, {
       "src": base64url.fromUint8Array(new TextEncoder().encode(`${fromBucket}:${src}`)),
@@ -201,7 +191,6 @@ export class FileService extends DogeService{
     return `${protocol}://${this.bucketDomain}/${encodeURIComponent(file.key)}`;
   }
 
-  /** COST CNY 0.5/GB/day */
   public async getSignUrl(file: IFile): Promise<{url: string, tip: string}>{
     const response = requestErrorHandler(await this.query("/oss/file/sign.json", {
       "bucket": this.bucket.alias,
@@ -210,25 +199,24 @@ export class FileService extends DogeService{
     return {url: response.data.data.url, tip: response.data.data.tips ?? ""}
   }
 
-  /** COST CNY 0.5/GB/day */
-  public async getSignHash(file: IFile): Promise<string>{
+  public async getSignHash(file: IFile): Promise<string | undefined>{
     const url = (await this.getSignUrl(file)).url;
     const headers: Headers = (await axiod.get(url, {
       headers: {
         "Range": "bytes=0-0"
       }
     })).headers;
-    return headers.get("x-cos-hash-crc64ecma") ?? "";
+    return headers.get("x-cos-hash-crc64ecma") ?? undefined;
   }
 
-  public async getHash(file: IFile): Promise<string>{
+  public async getHash(file: IFile): Promise<string | undefined>{
     const url = await this.getUrl(file);
     const headers: Headers = (await axiod.get(url, {
       headers: {
         "Range": "bytes=0-0"
       }
     })).headers;
-    return headers.get("x-cos-hash-crc64ecma") ?? "";
+    return headers.get("x-cos-hash-crc64ecma") ?? undefined;
   }
 
   public static async calculateHash(file: IFile){

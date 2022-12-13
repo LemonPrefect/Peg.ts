@@ -1,6 +1,4 @@
-import { hmac } from "https://deno.land/x/hmac@v2.0.1/mod.ts";
-import axiod from "https://deno.land/x/axiod@0.26.2/mod.ts";
-import { IAxiodResponse } from "https://deno.land/x/axiod@0.26.2/interfaces.ts";
+import { axiod, hmac, IAxiodResponse } from "../common/lib.ts";
 import { IConfig } from "../interfaces/IConfig.ts"
 import { ConfigService } from "./config.service.ts";
 

@@ -2,11 +2,7 @@
  * ./coscli mb cos://<BucketName-APPID> -r <Region> [flag]
  * https://cloud.tencent.com/document/product/436/63145
  */
-import { Command, EnumType } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
-import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
-import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
-import { Table } from "https://deno.land/x/cliffy@v0.25.5/table/mod.ts";
+import { Command, path, colors, os, Table, EnumType } from "./common/lib.ts";
 import { Bucket } from "../core/main/Bucket.ts";
 import { IBucket } from "../core/interfaces/IBucket.ts";
 import { Config } from "../core/main/Config.ts";

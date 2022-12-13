@@ -1,5 +1,4 @@
-import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
-import * as yaml from "npm:yaml@2.1.3";
+import { fs, yaml } from "../common/lib.ts";
 import { IBucket } from "../interfaces/IBucket.ts";
 import { BucketService } from "../services/bucket.service.ts"
 import { ConfigService } from "../services/config.service.ts";

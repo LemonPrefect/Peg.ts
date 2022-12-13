@@ -1,4 +1,4 @@
-import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
+import { Command } from "../common/lib.ts";
 import add from "./add.ts";
 import show from "./show.ts";
 import set from "./set.ts";

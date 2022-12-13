@@ -2,11 +2,7 @@
  * ./coscli config show [-c <config-file-path>]
  * https://cloud.tencent.com/document/product/436/63679
  */
-import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
-import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
-import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
-import { Table } from "https://deno.land/x/cliffy@v0.25.5/table/mod.ts";
+import { Command, colors, path, os, Table } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};

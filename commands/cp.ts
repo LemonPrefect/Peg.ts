@@ -2,10 +2,7 @@
  * ./coscli cp <source_path> <destination_path> [option]
  * https://cloud.tencent.com/document/product/436/63669
  */
-import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
-import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
-import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
+import { Command, path, colors, os } from "./common/lib.ts";
 import { Config } from "../core/main/Config.ts";
 import download from "./cp/download.ts";
 import upload from "./cp/upload.ts";

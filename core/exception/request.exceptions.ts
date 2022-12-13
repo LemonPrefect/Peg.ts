@@ -1,4 +1,4 @@
-import { IAxiodResponse } from "https://deno.land/x/axiod@0.26.2/interfaces.ts";
+import { IAxiodResponse } from "../common/lib.ts";
 
 class RequestError extends Error{}
 

@@ -65,7 +65,7 @@ export class File{
   }
 
   public async getHashRemote(file: IFile, sign = false){
-    return sign ? await this.service.getSignHash(file) : this.service.getHash(file);
+    return sign ? await this.service.getSignHash(file) ?? "" : this.service.getHash(file) ?? "";
   }
 
   public static async getHashLocal(file: IFile){
@@ -84,7 +84,7 @@ export class File{
       }catch(e){}
       let remoteHash = "";
       try{
-        remoteHash = await this.getHashRemote(file, sign);
+        remoteHash = await this.getHashRemote(file, sign) ?? "";
       }catch(e){}
       if((localHash !== remoteHash && localHash !== "0") || (localHash === "" && remoteHash === "")){
         result.push(file);

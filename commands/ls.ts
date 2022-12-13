@@ -2,13 +2,7 @@
  * ./coscli ls [doge://bucketAlias[/prefix/]] [flag]
  * https://cloud.tencent.com/document/product/436/63668
  */
-import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
-import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
-import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
-import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
-import { Table, Row, Cell } from "https://deno.land/x/cliffy@v0.25.5/table/mod.ts";
-import { tty } from "https://deno.land/x/cliffy@v0.25.5/ansi/tty.ts";
-import { ansi } from "https://deno.land/x/cliffy@v0.25.5/ansi/ansi.ts";
+import { Command, path, colors, os, Table, Row, Cell, tty, ansi } from "./common/lib.ts";
 import { Config } from "../core/main/Config.ts";
 import { Bucket } from "../core/main/Bucket.ts";
 import { File } from "../core/main/File.ts"

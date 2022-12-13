@@ -1,9 +1,4 @@
-import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
-import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
-import { walk } from "https://deno.land/std@0.121.0/fs/walk.ts";
-import { tty } from "https://deno.land/x/cliffy@v0.25.5/ansi/tty.ts";
-import { ansi } from "https://deno.land/x/cliffy@v0.25.5/ansi/ansi.ts";
-import * as progress from "https://deno.land/x/progress@v1.3.4/mod.ts";
+import { tty, path, ansi, progress, walk, fs } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
