@@ -9,6 +9,7 @@ import signurl from "./commands/signurl.ts";
 import hash from "./commands/hash.ts";
 import meta from "./commands/meta.ts";
 import rm from "./commands/rm.ts";
+import synccheck from "./commands/synccheck.ts";
 
 await new Command()
 
@@ -36,6 +37,7 @@ await new Command()
   .command("rb", rb)
   .command("rm", rm)
   .command("signurl", signurl)
+  .command("synccheck", synccheck)
   .parse(Deno.args)
 
 

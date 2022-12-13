@@ -16,6 +16,8 @@ const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.
 interface options{
   meta: Array<string>,
   recursive: boolean,
+  include: string,
+  exclude: string,
 
   configPath: string,
   secretId: string,
@@ -23,12 +25,19 @@ interface options{
 }
 
 export default await new Command()
-  .usage("[option]")
+  .usage("<bucket-uri> [option]")
   .description("Set the control meta of files")
   .example(
     "Set meta and delete meta of files",
-    'peg meta doge://bucket/1.txt -r doge://bucket/1.pptx --meta "-Cache-Control" --meta "Content-Type:text/plain"'
+    './peg meta doge://bucket/1.txt doge://bucket/1.pptx --meta "-Cache-Control" --meta "Content-Type:text/plain"'
   )
+  .example(
+    "Set meta and delete meta of files recursively",
+    './peg meta doge://bucket/ -r --include .*.otf --meta "-Cache-Control" --meta "Content-Type:text/plain"'
+  )
+  
+  .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
+  .option("--include <include:string>", "List files that meet the specified criteria")
   .option("--meta <meta:string>", "Set the meta information of the file", {
     collect: true,
     required: true
@@ -37,7 +46,7 @@ export default await new Command()
   .arguments("[paths...]")
 
   .action(async(e, ...paths) => {
-    let { meta, recursive, configPath, secretId, secretKey } = e as unknown as options;
+    let { exclude, include, meta, recursive, configPath, secretId, secretKey } = e as unknown as options;
 
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
@@ -51,12 +60,12 @@ export default await new Command()
         if(!(path as string).startsWith("doge://")){
           throw new Error(`${path} is invalid.`);
         }
-
+        
         const [dogeBucket, dogePath] = (path as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
         if(!dogeBucket){
           throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
         }
-        
+
         const bucket = config.getBucket(dogeBucket);
         if(!bucket){
           throw new Error(`Bucket \`${dogeBucket}' doesn't exist in config.`);
@@ -64,7 +73,7 @@ export default await new Command()
 
         const file = new File(config.getService(), bucket);
         let files: Array<IFile> = [] as Array<IFile>;
-        if(recursive){
+        if(!recursive){
           files = (await file.getFiles(dogePath)).files.filter(file => !file.key.endsWith("/"));
         }else{
           files = await file.getFilesRecurse(dogePath, (key: string) => {
@@ -73,6 +82,7 @@ export default await new Command()
             tty.cursorUp(1);
           });
         }
+        files = file.filterFilesRemote(files, include, exclude);
         files = (await file.getFilesInfo(files.map(file => file.key)));
         if(files.length === 0){
           console.log(warn("[WARN]"), `No file found in \`${dogePath}'!`);
@@ -174,14 +184,14 @@ export default await new Command()
         });
         if(confirm !== "set"){
           console.log(error("[FAILED]"), `Files meta will NOT be set.`);
-          return;
+          continue;
         }
         for(const task of files){
           console.log(`Setting header for ${task.key}...${ansi.eraseLineEnd.toString()}`);
           tty.cursorUp(1);      
           file.setFileHeaders(task, addHeaders, deleteKeys);
         }
-        console.log(success("[SUCCESS]"), `Files meta set for ${files.length} files in \`${dogePath}'`);
+        console.log(success("[SUCCESS]"), `Files meta set for ${files.length} files in \`${dogePath}'${ansi.eraseLineEnd.toString()}`);
       }
     }catch(e){
       console.log(error("[ERROR]"), e.message);

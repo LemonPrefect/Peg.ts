@@ -99,6 +99,9 @@ export class File{
     await this.service.setFileHeaders(file, headers);
   }
 
+  public async getSyncTime(file: IFile): Promise<string>{
+    return await this.service.getSyncTime(file) ?? "";
+  }
   public static formatBytes(bytes: number, decimals = 2){
     if (!+bytes) return '0 B';
     const k = 1024;
@@ -107,4 +110,6 @@ export class File{
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
   }
+
+
 }
