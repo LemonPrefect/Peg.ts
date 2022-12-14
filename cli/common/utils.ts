@@ -75,11 +75,10 @@ export function bucketInit(config: Config, bucketAlias: string){
   return bucket;
 }
 
-export function configInit(configPath: string | undefined, secretId: string | undefined, secretKey: string | undefined){
+export function configInit(configPath: string | undefined){
   configPath = configPath == undefined ? path.join(os.homeDir() ?? "./", ".peg.config.yaml") : configPath;
   try{
     const config = new Config(configPath);
-    Config.globalOverwrites(config, secretId, secretKey);
     return config;      
   }catch(e){
     throw new CommandError(t("utils.config.initFailed", {
@@ -88,11 +87,8 @@ export function configInit(configPath: string | undefined, secretId: string | un
   }
 }
 
-export function parseDogeURL(url: string, dir = false){
+export function parseDogeURL(url: string){
   const [bucket, path] = url.match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
-  if(dir && !path.endsWith("/")){
-    throw new CommandError(`${location} refers to a directory.`);
-  }
   if(!bucket){
     throw new CommandError(`dogeBucket: \`${bucket}' or dogePath: \`${path}' is invalid.`);
   }

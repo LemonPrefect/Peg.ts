@@ -2,43 +2,34 @@ import { tty, path, ansi, progress, walk, fs } from "../../common/lib.ts";
 import { Config } from "../../../core/main/Config.ts";
 import { File } from "../../../core/main/File.ts"
 import { IFile } from "../../../core/interfaces/IFile.ts";
+import { bucketInit, parseDogeURL, progressInit, recurseLog } from "../../common/utils.ts";
 
-const bars = new progress.MultiProgressBar({
-  title: "Uploading files",
-  display: `[:bar] :text :percent :time :completed/:total${ansi.eraseLineEnd.toString()}`
-});
+const bars = progressInit("Uploading files");
 
 export default async function upload(config: Config, paths: Array<string>, options: any){
   const fullpath = path.resolve(paths[0]);
-  const [dogeBucket, dogePath] = (paths[1] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
-  if(!dogeBucket){
-    throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
-  }
-  const bucket = config.getBucket(dogeBucket);
-  if(!bucket){
-    throw new Error(`Bucket \`${dogeBucket}' doesn't exist in config.`);
-  }
-
+  const destination = parseDogeURL((paths[1] as string));
+  const bucket = bucketInit(config, destination.bucket);
   const file = new File(config.getService(), bucket);
   let files: Array<IFile> = [] as Array<IFile>;
 
   if(fs.lstatSync(fullpath).isFile()){
-    if(!dogePath || dogePath.endsWith("/")){
+    if(!destination.path || destination.path.endsWith("/")){
       throw new Error("dogeurl should be a file.");
     }
     files.push({
-      key: dogePath,
+      key: destination.path,
       local: fullpath
     } as IFile);
   }else if(fs.lstatSync(fullpath).isDirectory()){
-    if(!dogePath || !dogePath.endsWith("/")){
+    if(!destination.path || !destination.path.endsWith("/")){
       throw new Error("dogeurl should be a directory.");
     }
     
     for await (const entry of walk(fullpath, { maxDepth: options.recursive ? Infinity : 1 })){
       if(entry.isFile){
         files.push({
-          key: path.posix.normalize(path.join(dogePath, path.posix.normalize(entry.path).replace(path.posix.normalize(fullpath), ""))).replaceAll("\\", "/"),
+          key: path.posix.normalize(path.join(destination.path, path.posix.normalize(entry.path).replace(path.posix.normalize(fullpath), ""))).replaceAll("\\", "/"),
           local: entry.path
         } as IFile);
       }
@@ -52,9 +43,7 @@ export default async function upload(config: Config, paths: Array<string>, optio
     console.log(`Sync Hashing...${ansi.eraseLineEnd.toString()}`);
     tty.cursorUp(1);
     files = await file.syncFilter(files, options.signUrl === true, (file: IFile) => {
-      tty.eraseLine;
-      console.log(`Hashing ${file.local}...${ansi.eraseLineEnd.toString()}`);
-      tty.cursorUp(1);
+      recurseLog(`Hashing ${file.local}`);
     });
   }
 

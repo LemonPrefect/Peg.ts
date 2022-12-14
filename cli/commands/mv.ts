@@ -3,13 +3,11 @@ import { Command, path, colors, os, tty, ansi, progress } from "../common/lib.ts
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
+import { bucketInit, configInit, parseDogeURL, progressInit, recurseLog } from "../common/utils.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
-const bars = new progress.MultiProgressBar({
-  title: "Moving files",
-  display: "[:bar] :text :percent :time :completed/:total"
-});
+const bars = progressInit("Moving files");
 
 interface options{
   exclude: string, 
@@ -42,65 +40,47 @@ export default await new Command()
   .option("-r, --recursive", "Move objects recursively")
 
   .action(async(e, ...paths) => {
-    let { exclude, include, recursive, force, configPath, secretId, secretKey } = e as unknown as options;
+    const { exclude, include, recursive, force, configPath, secretId, secretKey } = e as unknown as options;
     
-    if(!configPath){
-      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
-    }
-
     try{
-      const config = new Config(configPath);
+      const config = configInit(configPath);
       Config.globalOverwrites(config, secretId, secretKey);
 
       if(paths.length !== 2 || !paths[0].startsWith("doge://") || !paths[1].startsWith("doge://")){
         throw new Error(`Arg(s) \`${paths}' are invalid.`);
       }
 
-      const [sourceBucket, sourcePath] = (paths[0] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
-      const [destinationBucket, destinationPath] = (paths[1] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
-      
-      if(!sourceBucket){
-        throw new Error(`sourceBucket: \`${sourceBucket}' or sourcePath: \`${sourcePath}' is invalid.`);
-      }
-      if(!destinationBucket){
-        throw new Error(`destinationBucket: \`${destinationBucket}' or sourcePath: \`${destinationPath}' is invalid.`);
-      }
-      
-      const bucket = config.getBucket(sourceBucket);
-      if(!bucket){
-        throw new Error(`Bucket \`${sourceBucket}' doesn't exist in config.`);
-      }
-    
+      const source = parseDogeURL((paths[0] as string));
+      const destination = parseDogeURL((paths[1] as string));
+      const bucket = bucketInit(config, source.bucket);    
       const file = new File(config.getService(), bucket);
       let files: Array<IFile> = [] as Array<IFile>;
-      files = (await file.getFiles(sourcePath)).files;  
+      files = (await file.getFiles(source.path)).files;  
     
       if(recursive){
-        files = await file.getFilesRecurse(sourcePath, (key: string) => {
-          tty.eraseLine;
-          console.log(`Walking ${key}...${ansi.eraseLineEnd.toString()}`);
-          tty.cursorUp(1);
+        files = await file.getFilesRecurse(source.path, (key: string) => {
+          recurseLog(`Walking ${key}`);
         });
       }else{
-        files = (await file.getFiles(sourcePath)).files.filter((file) => !file.key.endsWith("/"));
+        files = (await file.getFiles(source.path)).files.filter((file) => !file.key.endsWith("/"));
       }
       const originalFileCount = files.length;
       files = file.filterFilesRemote(files, include, exclude);
     
       const tasks: Array<IFile> = [] as Array<IFile>;
       if(originalFileCount === 1){
-        files[0].local = destinationPath;
+        files[0].local = destination.path;
         tasks.push(files[0]);
       }else{
         for(const file of files){
-          file.local = path.posix.join(destinationPath, file.key.replace(sourcePath, ""));
+          file.local = path.posix.join(destination.path, file.key.replace(source.path, ""));
           tasks.push(file);
         }
       }
       for(const task of tasks){
-        moving(`${sourceBucket}/${task.key} => ${destinationBucket}/${task.local}`, tasks.indexOf(task), tasks.length)
-        await file.moveFile(task.key, task.local!, sourceBucket, destinationBucket, force);
-        moving(`${sourceBucket}/${task.key} => ${destinationBucket}/${task.local}`, tasks.indexOf(task) + 1, tasks.length)
+        moving(`${source.bucket}/${task.key} => ${destination.bucket}/${task.local}`, tasks.indexOf(task), tasks.length)
+        await file.moveFile(task.key, task.local!, source.bucket, destination.bucket, force);
+        moving(`${source.bucket}/${task.key} => ${destination.bucket}/${task.local}`, tasks.indexOf(task) + 1, tasks.length)
       }    
     }catch(e){
       console.log(error("[ERROR]"), e.message);

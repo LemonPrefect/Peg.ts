@@ -3,7 +3,7 @@ import { Command, path, colors, os, tty, ansi } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
-import { chart } from "../common/utils.ts";
+import { bucketInit, chart, configInit, parseDogeURL, recurseLog } from "../common/utils.ts";
 
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
@@ -33,14 +33,10 @@ export default await new Command()
   .arguments("[paths...]")
 
   .action(async(e, ...paths) => {
-    let { url, include, exclude, recursive, configPath, secretId, secretKey } = e as unknown as options;
-
-    if(!configPath){
-      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
-    }
+    const { url, include, exclude, recursive, configPath, secretId, secretKey } = e as unknown as options;
 
     try{
-      const config = new Config(configPath);
+      const config = configInit(configPath);
       Config.globalOverwrites(config, secretId, secretKey);
       
 
@@ -49,30 +45,20 @@ export default await new Command()
           throw new Error(`${path} is invalid.`);
         }
 
-        const [dogeBucket, dogePath] = (path as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
-        if(!dogeBucket){
-          throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
-        }
-        
-        const bucket = config.getBucket(dogeBucket);
-        if(!bucket){
-          throw new Error(`Bucket \`${dogeBucket}' doesn't exist in config.`);
-        }
-
+        const doge = parseDogeURL(path as string);
+        const bucket = bucketInit(config, doge.bucket);
         const file = new File(config.getService(), bucket);
         let files: Array<IFile> = [] as Array<IFile>;
         if(!recursive){
-          files = (await file.getFiles(dogePath)).files.filter((file) => !file.key.endsWith("/"));
+          files = (await file.getFiles(doge.path)).files.filter((file) => !file.key.endsWith("/"));
         }else{
-          files = await file.getFilesRecurse(dogePath, (key: string) => {
-            tty.eraseLine;
-            console.log(`Walking ${key}...${ansi.eraseLineEnd.toString()}`);
-            tty.cursorUp(1);
+          files = await file.getFilesRecurse(doge.path, (key: string) => {
+            recurseLog(`Walking ${key}`);
           });
         }
         files = file.filterFilesRemote(files, include, exclude);
         if(files.length === 0){
-          console.log(warn("[WARN]"), `No file found in \`${dogePath}'!`);
+          console.log(warn("[WARN]"), `No file found in \`${doge.path}'!`);
           continue;
         }
         let body: Array<Array<string> | string> = [] as Array<Array<string> | string>;
@@ -94,10 +80,10 @@ export default await new Command()
           }
         }
         if(body.length === 0){
-          console.log(success("[SUCCESS]"), `No file unsync cached in \`${dogePath}'!${ansi.eraseLineEnd.toString()}`);
+          console.log(success("[SUCCESS]"), `No file unsync cached in \`${doge.path}'!${ansi.eraseLineEnd.toString()}`);
           continue;
         }else{
-          console.log(success("[SUCCESS]"), `These files unsync cached in \`${dogePath}'!${ansi.eraseLineEnd.toString()}`);
+          console.log(success("[SUCCESS]"), `These files unsync cached in \`${doge.path}'!${ansi.eraseLineEnd.toString()}`);
         }
         if(url){
           for(const url of body){

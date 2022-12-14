@@ -7,7 +7,7 @@ import { Command, path, colors, os, tty, ansi, Input } from "../common/lib.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
 import { Config } from "../../core/main/Config.ts";
-import { chart } from "../common/utils.ts";
+import { bucketInit, chart, configInit, parseDogeURL } from "../common/utils.ts";
 
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
@@ -38,41 +38,30 @@ export default await new Command()
   .option("-r, --recursive", "Delete object recursively")
 
   .action(async(e, ...paths) => {
-    let { exclude, include, recursive, configPath, secretId, secretKey } = e as unknown as options;
+    const { exclude, include, recursive, configPath, secretId, secretKey } = e as unknown as options;
     
-    if(!configPath){
-      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
-    }
-
     try{
-      const config = new Config(configPath);
+      const config = configInit(configPath);
       Config.globalOverwrites(config, secretId, secretKey);
 
-      for(const dogeurl of paths){
-        const [dogeBucket, dogePath] = (dogeurl as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
-        if(!dogeBucket){
-          throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
-        }
-        const bucket = config.getBucket(dogeBucket);
-        if(!bucket){
-          throw new Error(`Bucket \`${dogeBucket}' doesn't exist in config.`);
-        }
-      
+      for(const dogeurl of paths){ ///dogeurl???
+        const doge = parseDogeURL(dogeurl as string);
+        const bucket = bucketInit(config, doge.bucket);
         const file = new File(config.getService(), bucket);
         let tasks: Array<IFile> = [] as Array<IFile>;
 
-        if(dogePath.endsWith("/") && !recursive){
+        if(doge.path.endsWith("/") && !recursive){
           throw new Error(`${dogeurl} refers to a directory, \`-r' to remove it.`);
         }
 
         if(recursive){
-          tasks = await file.getFilesRecurse(dogePath, (key: string) => {
+          tasks = await file.getFilesRecurse(doge.path, (key: string) => {
             tty.eraseLine;
             console.log(`Walking ${key}...${ansi.eraseLineEnd.toString()}`);
             tty.cursorUp(1);
           });
         }else{
-          tasks = (await file.getFiles(dogePath)).files.filter((file) => !file.key.endsWith("/"));
+          tasks = (await file.getFiles(doge.path)).files.filter((file) => !file.key.endsWith("/"));
         }
         tasks = file.filterFilesRemote(tasks, include, exclude);
 

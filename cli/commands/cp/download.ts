@@ -2,36 +2,27 @@ import { tty, path, ansi, progress, colors, fs } from "../../common/lib.ts";
 import { Config } from "../../../core/main/Config.ts";
 import { File } from "../../../core/main/File.ts"
 import { IFile } from "../../../core/interfaces/IFile.ts";
+import { bucketInit, parseDogeURL, progressInit } from "../../common/utils.ts";
 
-const bars = new progress.MultiProgressBar({
-  title: "Downloading files",
-  display: `[:bar] :text :percent :time :completed/:total${ansi.eraseLineEnd.toString()}`,
-});
+const bars = progressInit("Downloading files");
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
 
 export default async function download(config: Config, paths: Array<string>, options: any){
   const fullpath = path.resolve(paths[1]);
-  const [dogeBucket, dogePath] = (paths[0] as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
-  if(!dogeBucket){
-    throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
-  }
-  const bucket = config.getBucket(dogeBucket);
-  if(!bucket){
-    throw new Error(`Bucket \`${dogeBucket}' doesn't exist in config.`);
-  }
-
+  const source = parseDogeURL((paths[0] as string));
+  const bucket = bucketInit(config, source.bucket);
   const file = new File(config.getService(), bucket);
   let files: Array<IFile> = [] as Array<IFile>;
 
   if(options.recursive){
-    files = await file.getFilesRecurse(dogePath, (key: string) => {
+    files = await file.getFilesRecurse(source.path, (key: string) => {
       tty.eraseLine;
       console.log(`Walking ${key}...${ansi.eraseLineEnd.toString()}`);
       tty.cursorUp(1);
     });
   }else{
-    files = (await file.getFiles(dogePath)).files.filter((file) => !file.key.endsWith("/"));
+    files = (await file.getFiles(source.path)).files.filter((file) => !file.key.endsWith("/"));
   }
   const originalFileCount = files.length;
   files = file.filterFilesRemote(files, options.include, options.exclude);
@@ -42,12 +33,12 @@ export default async function download(config: Config, paths: Array<string>, opt
   }
 
   let tasks: Array<IFile> = [] as Array<IFile>;
-  if(originalFileCount === 1 && !dogePath.endsWith("/")){
+  if(originalFileCount === 1 && !source.path.endsWith("/")){
     files[0].local = fullpath;
     tasks.push(files[0]);
   }else{
     for(const file of files){
-      file.local = path.join(fullpath, file.key.replace(dogePath, ""));
+      file.local = path.join(fullpath, file.key.replace(source.path, ""));
       tasks.push(file);
     }
   }
@@ -68,15 +59,6 @@ export default async function download(config: Config, paths: Array<string>, opt
     console.log(warn("[WARN]"), "This url is CHARGED for CNY0.5/GB/DAY");
   }
   for(const task of tasks){
-    let size;
-    try{
-      size = fs.lstatSync(task.local!).size;
-    }catch{
-      size = 0;
-    }
-    if(options.sync){
-      size = 0;
-    }
     await file.downloadFile(task, options.signUrl, (e: number, c: number) => {
       downloading(`${task.key} => ${task.local}`, tasks.indexOf(task) + c, tasks.length, task.size, e);
     }); // qps limit!

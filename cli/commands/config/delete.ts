@@ -4,7 +4,7 @@
  */
 import { Command, colors, path, os } from "../../common/lib.ts";
 import { Config } from "../../../core/main/Config.ts";
-import { chart } from "../../common/utils.ts";
+import { bucketInit, chart, configInit } from "../../common/utils.ts";
 
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
@@ -21,16 +21,9 @@ export default await new Command()
 
   .action((e) => {
     let {alias, configPath} = e as {alias: string, configPath: string};
-    if(!configPath){
-      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
-    }
     try{
-      const config = new Config(configPath);
-      const bucket = config.getBucket(alias);
-      if(!bucket){
-        console.log(warn("[WARN]"), `Bucket \`${alias}' doesn't exist.`);
-        return;
-      }
+      const config = configInit(configPath);
+      const bucket = bucketInit(config, alias);
       config.deleteBucket(alias);
       console.log(success("[SUCCESS]"), `Bucket \`${alias}' deleted, showed as follow, config filename ${configPath}`);
       chart(["Name", "Alias", "Region", "Endpoint"], [[bucket.name, bucket.alias, bucket.region, bucket.endpoint]]).render();

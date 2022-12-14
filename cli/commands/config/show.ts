@@ -4,7 +4,7 @@
  */
 import { Command, colors, path, os } from "../../common/lib.ts";
 import { Config } from "../../../core/main/Config.ts";
-import { chart, colorLog } from "../../common/utils.ts"
+import { chart, colorLog, configInit } from "../../common/utils.ts"
 
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
@@ -17,11 +17,8 @@ export default await new Command()
 
   .action((e) => {
     let { configPath } = e as unknown as { configPath: string };
-    if(!configPath){
-      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
-    }
     try{
-      const config = new Config(configPath);
+      const config = configInit(configPath);
       console.log(`Configuration file path: ${configPath}`);
       console.log("Basic Configuration Information: ");
       chart([], [

@@ -3,11 +3,12 @@
  * https://cloud.tencent.com/document/product/436/63668
  */
 import { Command, path, colors, os, tty, ansi } from "../common/lib.ts";
-import { chart, colorLog, configInit } from "../common/utils.ts"
+import { bucketInit, chart, colorLog, configInit, parseDogeURL, recurseLog } from "../common/utils.ts"
 import { Bucket } from "../../core/main/Bucket.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
 import i18n from "../common/i18n.ts";
+import { Config } from "../../core/main/Config.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -41,7 +42,8 @@ export default await new Command()
   .action(async(e, location) => {
     const { exclude, include, limit, recursive, configPath, secretId, secretKey } = e as unknown as options;
     try{
-      const config = configInit(configPath, secretId, secretKey);
+      const config = configInit(configPath);
+      Config.globalOverwrites(config, secretId, secretKey);
       if(!location){
         colorLog("info", t("commands.ls.logs.buckets"));
         const bucket = new Bucket(config.getService());
@@ -53,32 +55,24 @@ export default await new Command()
         chart(["Name", "Alias", "Region", "Endpoint"], body).render();
         return;
       }
-      let [dogeBucket, dogePath] = (location as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
+      const doge = parseDogeURL(location as string);
 
-      if(!dogePath){
-        dogePath = "";
+      if(!doge.path){
+        doge.path = "";
       }
-      if(!dogePath.endsWith("/") && !(dogePath === "")){
-        dogePath += "/";
+      if(!doge.path.endsWith("/") && !(doge.path === "")){
+        doge.path += "/";
       }
       
-      if(!dogeBucket){
-        throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
-      }
-      const bucket = config.getBucket(dogeBucket);
-      if(!bucket){
-        throw new Error(`Bucket \`${dogeBucket}' doesn't exist in config ${configPath}.`);
-      }
+      const bucket = bucketInit(config, doge.bucket);
       const file = new File(config.getService(), bucket);
       let files: Array<IFile> = [] as Array<IFile>;
       if(recursive){
-        files = await file.getFilesRecurse(dogePath, (key: string) => {
-          tty.eraseLine;
-          console.log(`Walking ${key}...${ansi.eraseLineEnd.toString()}`);
-          tty.cursorUp(1);
+        files = await file.getFilesRecurse(doge.path, (key: string) => {
+          recurseLog(`Walking ${key}`);
         });
       }else{
-        files = (await file.getFiles(dogePath, limit)).files;
+        files = (await file.getFiles(doge.path, limit)).files;
       }
       files = file.filterFilesRemote(files, include, exclude);
       const body: Array<Array<string>> = [] as Array<Array<string>>;

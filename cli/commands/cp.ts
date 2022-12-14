@@ -7,6 +7,7 @@ import { Config } from "../../core/main/Config.ts";
 import download from "./cp/download.ts";
 import upload from "./cp/upload.ts";
 import copy from "./cp/copy.ts";
+import { configInit } from "../common/utils.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -61,12 +62,8 @@ export default await new Command()
   .action(async(e, ...paths) => {
     let { configPath, secretId, secretKey } = e as unknown as options;
     
-    if(!configPath){
-      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
-    }
-
     try{
-      const config = new Config(configPath);
+      const config = configInit(configPath);
       Config.globalOverwrites(config, secretId, secretKey);
 
       if(paths.length !== 2){

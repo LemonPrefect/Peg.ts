@@ -7,6 +7,7 @@ import { Command, path, colors, os } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
+import { bucketInit, configInit, parseDogeURL } from "../common/utils.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -29,29 +30,19 @@ export default await new Command()
   .action(async(e, location) => {
     let { configPath, secretId, secretKey } = e as unknown as options;
     
-    if(!configPath){
-      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
-    }
-
     try{
-      const config = new Config(configPath);
+      const config = configInit(configPath);
       Config.globalOverwrites(config, secretId, secretKey);
 
-      const [dogeBucket, dogePath] = (location as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
-      if(dogePath.endsWith("/")){
+      const doge = parseDogeURL(location as string);
+      if(doge.path.endsWith("/")){
         throw new Error(`${location} refers to a directory.`);
       }
-      if(!dogeBucket){
-        throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
-      }
 
-      const bucket = config.getBucket(dogeBucket);
-      if(!bucket){
-        throw new Error(`Bucket \`${dogeBucket}' doesn't exist in config.`);
-      }
+      const bucket = bucketInit(config, doge.bucket);
 
       const file = new File(config.getService(), bucket);
-      const files: Array<IFile> = (await file.getFiles(dogePath, 1)).files;
+      const files: Array<IFile> = (await file.getFiles(doge.path, 1)).files;
       if(files.length !== 1){
         throw new Error("No file found!");
       }

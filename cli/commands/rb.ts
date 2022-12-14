@@ -6,7 +6,7 @@ import { Command, path, colors, os, EnumType, Input } from "../common/lib.ts";
 import { Bucket } from "../../core/main/Bucket.ts";
 import { IBucket } from "../../core/interfaces/IBucket.ts";
 import { Config } from "../../core/main/Config.ts";
-import { chart } from "../common/utils.ts";
+import { chart, configInit } from "../common/utils.ts";
 
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
@@ -36,12 +36,10 @@ export default await new Command()
   .arguments("<alias:string>")
 
   .action(async(e, alias) => {
-    let { region, configPath, secretId, secretKey } = e as unknown as options;
-    if(!configPath){
-      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
-    }
+    const { region, configPath, secretId, secretKey } = e as unknown as options;
+    
     try{
-      const config = new Config(configPath);
+      const config = configInit(configPath);
       Config.globalOverwrites(config, secretId, secretKey);
 
       const bucket = new Bucket(config.getService());
