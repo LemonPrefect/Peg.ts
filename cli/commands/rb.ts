@@ -2,10 +2,12 @@
  * ./coscli rb cos://<BucketName-APPID> -r <Region> [flag]
  * https://cloud.tencent.com/document/product/436/63667
  */
-import { Command, path, colors, os, Table, EnumType, Input } from "../common/lib.ts";
+import { Command, path, colors, os, EnumType, Input } from "../common/lib.ts";
 import { Bucket } from "../../core/main/Bucket.ts";
 import { IBucket } from "../../core/interfaces/IBucket.ts";
 import { Config } from "../../core/main/Config.ts";
+import { chart } from "../common/utils.ts";
+
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -47,13 +49,7 @@ export default await new Command()
       
       for(const _ of buckets){
         if(_.alias === alias && _.region === region){
-          new Table()
-          .header(["Name", "Alias", "Region", "Endpoint"])
-          .body([
-            [_.name, _.alias, _.region, _.endpoint],
-          ])
-          .border(true)
-          .render();
+          chart(["Name", "Alias", "Region", "Endpoint"], [[_.name, _.alias, _.region, _.endpoint]]).render();
           const confirm: string = await Input.prompt({
             message: `Are you sure to delete bucket ${alias}? Enter \`${alias}' to confirm`,
           });

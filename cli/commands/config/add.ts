@@ -2,8 +2,10 @@
  * ./coscli config add -b <bucket-name> -e <endpoint> -a <alias> [-c <config-file-path>]
  * https://cloud.tencent.com/document/product/436/63679
  */
-import { Command, colors, path, os, Table } from "../../common/lib.ts";
+import { Command, colors, path, os } from "../../common/lib.ts";
 import { Config } from "../../../core/main/Config.ts";
+import { chart } from "../../common/utils.ts";
+
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -31,13 +33,7 @@ export default await new Command()
           return;
         }
         console.log(success("[SUCCESS]"), `Bucket \`${alias}' added, config filename ${configPath}`);
-        new Table()
-          .header(["Name", "Alias", "Region", "Endpoint"])
-          .body([
-            [bucket.name, bucket.alias, bucket.region, bucket.endpoint],
-          ])
-          .border(true)
-          .render();
+        chart(["Name", "Alias", "Region", "Endpoint"], [[bucket.name, bucket.alias, bucket.region, bucket.endpoint]]).render();
       }else{
         console.log(error("[FAILED]"), `Bucket \`${alias}' FAILED to add as it's not exist in endpoint.`);
       }

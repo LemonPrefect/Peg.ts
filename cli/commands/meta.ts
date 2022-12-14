@@ -1,8 +1,9 @@
 /** 修改文件元数据 - meta */
-import { Command, path, colors, os, Table, Row, Cell, tty, ansi, Input } from "../common/lib.ts";
+import { Command, path, colors, os, tty, ansi, Input } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
+import { chart } from "../common/utils.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -101,76 +102,29 @@ export default await new Command()
         console.log(info("[INFO]"), "These files will be meta set!");
         let body: Array<Array<string>> = [] as Array<Array<string>>;
         for(const task of files){
-          body.push(Row.from([
+          body.push([
             task.key,
             task.key.endsWith("/") ? "dir" : "standard",
             task.time,
             File.formatBytes(task.size),
-          ]).align("right"))
+          ])
         }
-        Table
-        .from([
-          ...body,
-          Row.from([new Cell("Total Objects:").colSpan(3).align("right"), new Cell(files.length)]).border(false)
-        ])
-        .header(Row.from(["Key", "Type", "Last Modified", "Size"]).border(false).align("center"))
-        .border(true)
-        .chars({
-          "top": "-",
-          "topMid": "+",
-          "topLeft": "",
-          "topRight": "",
-          "bottom": "-",
-          "bottomMid": "+",
-          "bottomLeft": "",
-          "bottomRight": "",
-          "left": "",
-          "leftMid": "",
-          "mid": "",
-          "midMid": "",
-          "right": "",
-          "rightMid": "",
-          "middle": "│"
-        })
-        .render();
+        chart(["Key", "Type", "Last Modified", "Size"], body, true, files.length).render();
         console.log(info("[INFO]"), "Metas are as follow: ");
         body = [];
         for(const key of deleteKeys){
-          body.push(Row.from([
+          body.push([
             key,
             "DELETE"
-          ]).align("right"))
+          ]);
         }
         for(const header of addHeaders){
-          body.push(Row.from([
+          body.push([
             header.key,
             header.value.toString()
-          ]).align("right"))
+          ]);
         }
-        Table
-        .from([
-          ...body
-        ])
-        .header(Row.from(["Meta", "Change"]).border(false).align("center"))
-        .border(true)
-        .chars({
-          "top": "-",
-          "topMid": "+",
-          "topLeft": "",
-          "topRight": "",
-          "bottom": "-",
-          "bottomMid": "+",
-          "bottomLeft": "",
-          "bottomRight": "",
-          "left": "",
-          "leftMid": "",
-          "mid": "",
-          "midMid": "",
-          "right": "",
-          "rightMid": "",
-          "middle": "│"
-        })
-        .render();
+        chart(["Meta", "Change"], body, true, -1).render();
 
         const confirm: string = await Input.prompt({
           message: `Are you sure to set these meta? Enter \`set' to confirm`,

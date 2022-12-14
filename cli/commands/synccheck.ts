@@ -1,8 +1,10 @@
 /** 查看 CDN 缓存文件 - synccheck */
-import { Command, path, colors, os, Table, Row, Cell, tty, ansi } from "../common/lib.ts";
+import { Command, path, colors, os, tty, ansi } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
+import { chart } from "../common/utils.ts";
+
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -83,11 +85,11 @@ export default await new Command()
             if(url){
               body.push(await file.getUrl(task));
             }else{
-              body.push(Row.from([
+              body.push([
                 task.key,
                 task.time,
                 cacheTime
-              ]).align("right"));
+              ]);
             }
           }
         }
@@ -102,31 +104,7 @@ export default await new Command()
             console.log(url);
           }
         }else{
-          Table
-          .from([
-            ...body as Array<Array<string>>,
-            Row.from([new Cell("Total Objects:").colSpan(2).align("right"), new Cell(body.length)]).border(false)
-          ])
-          .header(Row.from(["Key", "Last Modified", "Last Cached"]).border(false).align("center"))
-          .border(true)
-          .chars({
-            "top": "-",
-            "topMid": "+",
-            "topLeft": "",
-            "topRight": "",
-            "bottom": "-",
-            "bottomMid": "+",
-            "bottomLeft": "",
-            "bottomRight": "",
-            "left": "",
-            "leftMid": "",
-            "mid": "",
-            "midMid": "",
-            "right": "",
-            "rightMid": "",
-            "middle": "│"
-          })
-          .render();  
+          chart(["Key", "Last Modified", "Last Cached"], body as Array<Array<string>>, true, body.length).render();
         }
       }
     }catch(e){

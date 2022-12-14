@@ -2,8 +2,10 @@
  * ./coscli config show [-c <config-file-path>]
  * https://cloud.tencent.com/document/product/436/63679
  */
-import { Command, colors, path, os, Table } from "../../common/lib.ts";
+import { Command, colors, path, os } from "../../common/lib.ts";
 import { Config } from "../../../core/main/Config.ts";
+import { chart, colorLog } from "../../common/utils.ts"
+
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -22,24 +24,17 @@ export default await new Command()
       const config = new Config(configPath);
       console.log(`Configuration file path: ${configPath}`);
       console.log("Basic Configuration Information: ");
-      new Table()
-      .body([
+      chart([], [
         ["Secret ID", config.getConfig().secretId],
         ["Secret Key", config.getConfig().secretKey],
-      ])
-      .border(true)
-      .render();
+      ]).render();
       console.log("Buckets: ");
       const body: Array<Array<string>> = [];
       for(const bucket of config.getConfig().buckets){
         body.push([bucket.name, bucket.alias, bucket.region, bucket.endpoint])
       }
-      new Table()
-      .header(["Name", "Alias", "Region", "Endpoint"])
-      .body(body)
-      .border(true)
-      .render();
-    }catch(e){
+      chart(["Name", "Alias", "Region", "Endpoint"], body).render();
+  }catch(e){
       console.log(error("[ERROR]"), e.message);
     }
   })

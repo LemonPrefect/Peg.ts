@@ -2,11 +2,13 @@
  * ./coscli rm cos://<bucketAlias>[/prefix/] [cos://<bucket-name>[/prefix/]...] [flag]
  * https://www.tencentcloud.com/zh/document/product/436/43258
  */
-import { Command, path, colors, os, Table, Row, Cell, tty, ansi, Input } from "../common/lib.ts";
+import { Command, path, colors, os, tty, ansi, Input } from "../common/lib.ts";
 
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
 import { Config } from "../../core/main/Config.ts";
+import { chart } from "../common/utils.ts";
+
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -77,38 +79,14 @@ export default await new Command()
         console.log(warn("These files will be deleted!"));
         const body: Array<Array<string>> = [] as Array<Array<string>>;
         for(const task of tasks){
-          body.push(Row.from([
+          body.push([
             task.key,
             task.key.endsWith("/") ? "dir" : "standard",
             task.time,
-            File.formatBytes(task.size),
-          ]).align("right"))
+            File.formatBytes(task.size)
+          ])
         }
-        Table
-        .from([
-          ...body,
-          Row.from([new Cell("Total Objects:").colSpan(3).align("right"), new Cell(tasks.length)]).border(false)
-        ])
-        .header(Row.from(["Key", "Type", "Last Modified", "Size"]).border(false).align("center"))
-        .border(true)
-        .chars({
-          "top": "-",
-          "topMid": "+",
-          "topLeft": "",
-          "topRight": "",
-          "bottom": "-",
-          "bottomMid": "+",
-          "bottomLeft": "",
-          "bottomRight": "",
-          "left": "",
-          "leftMid": "",
-          "mid": "",
-          "midMid": "",
-          "right": "",
-          "rightMid": "",
-          "middle": "│"
-        })
-        .render();
+        chart(["Key", "Type", "Last Modified", "Size"], body, true, tasks.length).render();
         const confirm: string = await Input.prompt({
           message: `Are you sure to delete them? Enter \`delete' to confirm`,
         });

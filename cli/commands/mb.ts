@@ -2,7 +2,8 @@
  * ./coscli mb cos://<BucketName-APPID> -r <Region> [flag]
  * https://cloud.tencent.com/document/product/436/63145
  */
-import { Command, path, colors, os, Table, EnumType } from "../common/lib.ts";
+import { Command, path, colors, os, EnumType } from "../common/lib.ts";
+import { chart, colorLog } from "../common/utils.ts"
 import { Bucket } from "../../core/main/Bucket.ts";
 import { IBucket } from "../../core/interfaces/IBucket.ts";
 import { Config } from "../../core/main/Config.ts";
@@ -53,13 +54,7 @@ export default await new Command()
       for(const bucket of buckets){
         if(bucket.alias === alias){
           console.log(success("[SUCCESS]"), `Bucket \`${alias}' added.`);
-          new Table()
-          .header(["Name", "Alias", "Region", "Endpoint"])
-          .body([
-            [bucket.name, bucket.alias, bucket.region, bucket.endpoint],
-          ])
-          .border(true)
-          .render();
+          chart(["Name", "Alias", "Region", "Endpoint"], [[bucket.name, bucket.alias, bucket.region, bucket.endpoint]]).render();
           console.log(success("[INFO]"), `Use ./peg config add ${alias} to add bucket into config.`);
           return;
         }

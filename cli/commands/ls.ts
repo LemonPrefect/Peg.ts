@@ -2,7 +2,8 @@
  * ./coscli ls [doge://bucketAlias[/prefix/]] [flag]
  * https://cloud.tencent.com/document/product/436/63668
  */
-import { Command, path, colors, os, Table, Row, Cell, tty, ansi } from "../common/lib.ts";
+import { Command, path, colors, os, tty, ansi } from "../common/lib.ts";
+import { chart, colorLog } from "../common/utils.ts"
 import { Config } from "../../core/main/Config.ts";
 import { Bucket } from "../../core/main/Bucket.ts";
 import { File } from "../../core/main/File.ts"
@@ -21,7 +22,6 @@ export interface options{
   secretId: string,
   secretKey: string
 }
-
 const t = i18n();
 
 export default await new Command()
@@ -49,18 +49,14 @@ export default await new Command()
       Config.globalOverwrites(config, secretId, secretKey);
 
       if(!location){
-        console.log("Buckets: ");
+        colorLog("info", t("commands.ls.logs.buckets"));
         const bucket = new Bucket(config.getService());
         const buckets = await bucket.getBuckets();
         const body: Array<Array<string>> = [];
         for(const bucket of buckets){
           body.push([bucket.name, bucket.alias, bucket.region, bucket.endpoint])
         }
-        new Table()
-        .header(["Name", "Alias", "Region", "Endpoint"])
-        .body(body)
-        .border(true)
-        .render();
+        chart(["Name", "Alias", "Region", "Endpoint"], body).render();
         return;
       }
       let [dogeBucket, dogePath] = (location as string).match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
@@ -93,38 +89,14 @@ export default await new Command()
       files = file.filterFilesRemote(files, include, exclude);
       const body: Array<Array<string>> = [] as Array<Array<string>>;
       for(const file of files){
-        body.push(Row.from([
+        body.push([
           file.key,
           file.key.endsWith("/") ? "dir" : "standard",
           file.time,
           File.formatBytes(file.size),
-        ]).align("right"))
-      }
-      Table
-        .from([
-          ...body,
-          Row.from([new Cell("Total Objects:").colSpan(3).align("right"), new Cell(files.length)]).border(false)
         ])
-        .header(Row.from(["Key", "Type", "Last Modified", "Size"]).border(false).align("center"))
-        .border(true)
-        .chars({
-          "top": "-",
-          "topMid": "+",
-          "topLeft": "",
-          "topRight": "",
-          "bottom": "-",
-          "bottomMid": "+",
-          "bottomLeft": "",
-          "bottomRight": "",
-          "left": "",
-          "leftMid": "",
-          "mid": "",
-          "midMid": "",
-          "right": "",
-          "rightMid": "",
-          "middle": "│"
-        })
-        .render();  
+      }
+      chart(["Key", "Type", "Last Modified", "Size"], body, true, files.length).render();  
     }catch(e){
       console.log(error("[ERROR]"), e.message);
     }

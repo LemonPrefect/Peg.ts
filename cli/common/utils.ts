@@ -1,5 +1,8 @@
-import { path, os, colors, ansi } from "./lib.ts";
+import { path, os, colors, ansi, Table, Row, Cell } from "./lib.ts";
+import i18n from "../common/i18n.ts";
 import { Config } from "../../core/main/Config.ts";
+const t = i18n();
+
 const paints: Record<string, any> = {
   "error": colors.bold.red, 
   "warn": colors.bold.yellow, 
@@ -7,11 +10,51 @@ const paints: Record<string, any> = {
   "success": colors.bold.green
 };
 
-function chart(){}
+export function chart(header: Array<string>, body: Array<Array<string>>, list = false, objectCount = 0){
+  if(list){
+    const lines: Array<Row> = [] as Array<Row>;
+    for(const line of body){
+      lines.push(Row.from(line).align("right"))
+    }
+    if(objectCount !== -1){
+      lines.push(Row.from([new Cell(t("utils.chart.total")).colSpan(header.length - 1).align("right"), new Cell(objectCount)]).border(false));
+    }
+    return Table
+    .from(lines)
+    .header(Row.from(header).border(false).align("center"))
+    .border(true)
+    .chars({
+      "top": "-",
+      "topMid": "+",
+      "topLeft": "",
+      "topRight": "",
+      "bottom": "-",
+      "bottomMid": "+",
+      "bottomLeft": "",
+      "bottomRight": "",
+      "left": "",
+      "leftMid": "",
+      "mid": "",
+      "midMid": "",
+      "right": "",
+      "rightMid": "",
+      "middle": "│"
+    })
+  }else{
+    if(header.length > 0){
+      return new Table()
+      .header(header)
+      .body(body)
+      .border(true)  
+    }else{
+      return new Table()
+      .body(body)
+      .border(true)
+    }
+  }
+}
 
-function chartList(){}
-
-function colorLog(level: string, message: string, eraseEnd = true){
+export function colorLog(level: string, message: string, eraseEnd = true){
   const color = (paints)[level] ?? colors.white;
   console.log(color(`[${level.toUpperCase()}]`),`${message}${eraseEnd ? ansi.eraseLineEnd.toString() : ""}`, )
 }

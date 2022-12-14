@@ -2,8 +2,9 @@
  * ./coscli config set [option]
  * https://cloud.tencent.com/document/product/436/63679
  */
-import { Command, colors, path, os, Table } from "../../common/lib.ts";
+import { Command, colors, path, os} from "../../common/lib.ts";
 import { Config } from "../../../core/main/Config.ts";
+import { chart, colorLog } from "../../common/utils.ts"
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -25,13 +26,10 @@ export default await new Command()
         console.log(success("[SUCCESS]"), `Credential set.`);
       }
       console.log("Basic Configuration Information: ");
-      new Table()
-      .body([
+      chart([], [
         ["Secret ID", config.getConfig().secretId],
         ["Secret Key", config.getConfig().secretKey],
-      ])
-      .border(true)
-      .render();
+      ]).render();
     }catch(e){
       console.log(error("[ERROR]"), e.message);
     }

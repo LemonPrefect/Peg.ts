@@ -1,5 +1,4 @@
 {
-  "test": "123",
   "commands": {
     "config": {
     },
@@ -9,8 +8,24 @@
         "exclude": "Exclude files that meet the specified criteria",
         "include": "List files that meet the specified criteria",
         "limit": "Limit the number of objects listed(0~1000)",
-        "recurse": "List objects recursively"
+        "recurse": "List objects recursively",
+        "charts": {
+          "buckets": {
+
+          },
+          "files": {
+
+          }
+        }
+      },
+      "logs": {
+        "buckets": "Buckets: "
       }
+    }
+  },
+  "utils": {
+    "chart": {
+      "total": "Total Objects: "
     }
   }
 }
