@@ -2,8 +2,8 @@
  * ./coscli config add -b <bucket-name> -e <endpoint> -a <alias> [-c <config-file-path>]
  * https://cloud.tencent.com/document/product/436/63679
  */
-import { Command, colors, path, os, Table } from "../common/lib.ts";
-import { Config } from "../../core/main/Config.ts";
+import { Command, colors, path, os, Table } from "../../common/lib.ts";
+import { Config } from "../../../core/main/Config.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 

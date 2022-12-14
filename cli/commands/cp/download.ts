@@ -1,7 +1,7 @@
-import { tty, path, ansi, progress, colors, fs } from "../common/lib.ts";
-import { Config } from "../../core/main/Config.ts";
-import { File } from "../../core/main/File.ts"
-import { IFile } from "../../core/interfaces/IFile.ts";
+import { tty, path, ansi, progress, colors, fs } from "../../common/lib.ts";
+import { Config } from "../../../core/main/Config.ts";
+import { File } from "../../../core/main/File.ts"
+import { IFile } from "../../../core/interfaces/IFile.ts";
 
 const bars = new progress.MultiProgressBar({
   title: "Downloading files",

@@ -1,4 +1,4 @@
-import { Command } from "../common/lib.ts";
+import { Command } from "../../common/lib.ts";
 import add from "./add.ts";
 import show from "./show.ts";
 import set from "./set.ts";

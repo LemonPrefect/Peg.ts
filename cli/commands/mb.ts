@@ -2,10 +2,10 @@
  * ./coscli mb cos://<BucketName-APPID> -r <Region> [flag]
  * https://cloud.tencent.com/document/product/436/63145
  */
-import { Command, path, colors, os, Table, EnumType } from "./common/lib.ts";
-import { Bucket } from "../core/main/Bucket.ts";
-import { IBucket } from "../core/interfaces/IBucket.ts";
-import { Config } from "../core/main/Config.ts";
+import { Command, path, colors, os, Table, EnumType } from "../common/lib.ts";
+import { Bucket } from "../../core/main/Bucket.ts";
+import { IBucket } from "../../core/interfaces/IBucket.ts";
+import { Config } from "../../core/main/Config.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 

@@ -1,9 +1,11 @@
 /** deno */
 import os from "https://deno.land/x/dos@v0.11.0/mod.ts";
 import * as progress from "https://deno.land/x/progress@v1.3.4/mod.ts";
+import i18next from "https://deno.land/x/i18next@v22.4.5/index.js";
 export {
   os,
-  progress
+  progress,
+  i18next
 };
 
 /** deno std */

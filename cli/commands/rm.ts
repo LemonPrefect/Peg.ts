@@ -2,11 +2,11 @@
  * ./coscli rm cos://<bucketAlias>[/prefix/] [cos://<bucket-name>[/prefix/]...] [flag]
  * https://www.tencentcloud.com/zh/document/product/436/43258
  */
-import { Command, path, colors, os, Table, Row, Cell, tty, ansi, Input } from "./common/lib.ts";
+import { Command, path, colors, os, Table, Row, Cell, tty, ansi, Input } from "../common/lib.ts";
 
-import { File } from "../core/main/File.ts"
-import { IFile } from "../core/interfaces/IFile.ts";
-import { Config } from "../core/main/Config.ts";
+import { File } from "../../core/main/File.ts"
+import { IFile } from "../../core/interfaces/IFile.ts";
+import { Config } from "../../core/main/Config.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 

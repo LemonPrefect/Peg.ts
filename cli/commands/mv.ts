@@ -1,8 +1,8 @@
 
-import { Command, path, colors, os, tty, ansi, progress } from "./common/lib.ts";
-import { Config } from "../core/main/Config.ts";
-import { File } from "../core/main/File.ts"
-import { IFile } from "../core/interfaces/IFile.ts";
+import { Command, path, colors, os, tty, ansi, progress } from "../common/lib.ts";
+import { Config } from "../../core/main/Config.ts";
+import { File } from "../../core/main/File.ts"
+import { IFile } from "../../core/interfaces/IFile.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 

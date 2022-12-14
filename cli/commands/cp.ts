@@ -2,8 +2,8 @@
  * ./coscli cp <source_path> <destination_path> [option]
  * https://cloud.tencent.com/document/product/436/63669
  */
-import { Command, path, colors, os } from "./common/lib.ts";
-import { Config } from "../core/main/Config.ts";
+import { Command, path, colors, os } from "../common/lib.ts";
+import { Config } from "../../core/main/Config.ts";
 import download from "./cp/download.ts";
 import upload from "./cp/upload.ts";
 import copy from "./cp/copy.ts";
