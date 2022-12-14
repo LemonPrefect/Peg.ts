@@ -1,4 +1,5 @@
 import { Command } from "./cli/common/lib.ts";
+import i18n from "./cli/common/i18n.ts";
 import ls from "./cli/commands/ls.ts";
 import mb from "./cli/commands/mb.ts";
 import mv from "./cli/commands/mv.ts";

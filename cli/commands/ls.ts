@@ -7,6 +7,7 @@ import { Config } from "../../core/main/Config.ts";
 import { Bucket } from "../../core/main/Bucket.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
+import i18n from "../common/i18n.ts";
 
 const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
 
@@ -21,9 +22,11 @@ export interface options{
   secretKey: string
 }
 
+const t = i18n();
+
 export default await new Command()
   .usage("[bucket-uri] [option]")
-  .description("List buckets or objects")
+  .description(t("commands.ls.description"))
   .example(
     "List file recursively",
     "./peg ls doge://examplebucket/test/ -r"
@@ -31,10 +34,10 @@ export default await new Command()
   
   .arguments("[location:string]")
   
-  .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
-  .option("--include <include:string>", "List files that meet the specified criteria")
-  .option("--limit <limit:integer>", "Limit the number of objects listed(0~1000)")
-  .option("-r, --recursive", "List objects recursively")
+  .option("--exclude <exclude:string>", t("commands.ls.options.exclude"))
+  .option("--include <include:string>", t("commands.ls.options.include"))
+  .option("--limit <limit:integer>", t("commands.ls.options.limit"))
+  .option("-r, --recursive", t("commands.ls.options.recurse"))
   
   .action(async(e, location) => {
     let { exclude, include, limit, recursive, configPath, secretId, secretKey } = e as unknown as options;

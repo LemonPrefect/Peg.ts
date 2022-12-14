@@ -1,0 +1,16 @@
+{
+  "test": "123",
+  "commands": {
+    "config": {
+    },
+    "ls": {
+      "description": "列出存储桶和存储对象",
+      "options": {
+        "exclude": "从结果集中剔除",
+        "include": "从结果集中选出",
+        "limit": "结果集大小(0~1000)",
+        "recurse": "递归操作"
+      }
+    }
+  }
+}

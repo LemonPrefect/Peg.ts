@@ -1,0 +1,16 @@
+{
+  "test": "123",
+  "commands": {
+    "config": {
+    },
+    "ls": {
+      "description": "List buckets or objects",
+      "options": {
+        "exclude": "Exclude files that meet the specified criteria",
+        "include": "List files that meet the specified criteria",
+        "limit": "Limit the number of objects listed(0~1000)",
+        "recurse": "List objects recursively"
+      }
+    }
+  }
+}

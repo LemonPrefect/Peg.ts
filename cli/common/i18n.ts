@@ -1,22 +1,21 @@
 import { i18next } from "./lib.ts";
-// import { zhCN } from "./locales/zh-CN.json" assert { type: "json" };
+import zhcn from "../locales/zhcn.json" assert { type: "json" };
+import enbg from "../locales/enbg.json" assert { type: "json" };
 
 const systemLocale = Intl.DateTimeFormat().resolvedOptions().locale;
 
-// i18next
-//   .use(Backend)
-//   .init({
-//     // debug: true,
-//     fallbackLng: "en",
-//     resources: {
-//       en: {
-//         translation: enTranslation,
-//       },
-//       de: {
-//         translation: deTranslation,
-//       },
-//     }
-//   });
+i18next
+  .init({
+    // debug: true,
+    fallbackLng: "en-BG",
+    resources: {
+      "zh-CN": {
+        translation: zhcn,
+      },
+      "en-BG": {
+        translation: enbg,
+      },
+    }
+  });
 
-// export default (lng: string | undefined | null) =>
-//   i18next.getFixedT(lng || systemLocale);
+export default (lang: string | undefined | null = undefined) => i18next.getFixedT(lang || systemLocale);
