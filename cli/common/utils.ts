@@ -1,6 +1,7 @@
-import { path, os, colors, ansi, Table, Row, Cell } from "./lib.ts";
+import { path, os, colors, ansi, Table, Row, Cell, progress, tty } from "./lib.ts";
 import i18n from "../common/i18n.ts";
 import { Config } from "../../core/main/Config.ts";
+import { CommandError } from "../exceptions/CommandError.ts";
 const t = i18n();
 
 const paints: Record<string, any> = {
@@ -59,29 +60,49 @@ export function colorLog(level: string, message: string, eraseEnd = true){
   console.log(color(`[${level.toUpperCase()}]`),`${message}${eraseEnd ? ansi.eraseLineEnd.toString() : ""}`, )
 }
 
-function progressInit(){}
+export function progressInit(title: string){
+  return new progress.MultiProgressBar({
+    title: title,
+    display: `[:bar] :text :percent :time :completed/:total${ansi.eraseLineEnd.toString()}`
+  });
+}
 
-function configInit(configPath: string | undefined, secretId: string | undefined, secretKey: string | undefined){
+export function bucketInit(config: Config, bucketAlias: string){
+  const bucket = config.getBucket(bucketAlias);
+  if(!bucket){
+    throw new CommandError(`Bucket \`${bucketAlias}' doesn't exist.`);
+  }
+  return bucket;
+}
+
+export function configInit(configPath: string | undefined, secretId: string | undefined, secretKey: string | undefined){
   configPath = configPath == undefined ? path.join(os.homeDir() ?? "./", ".peg.config.yaml") : configPath;
   try{
     const config = new Config(configPath);
     Config.globalOverwrites(config, secretId, secretKey);
     return config;      
   }catch(e){
-    // throw new CommandError()
+    throw new CommandError(t("utils.config.initFailed", {
+      path: configPath
+    }));
   }
 }
 
-function parseDogeURL(url: string, dir = false){
+export function parseDogeURL(url: string, dir = false){
   const [bucket, path] = url.match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
-  if(path.endsWith("/")){
-    throw new Error(`${location} refers to a directory.`);
+  if(dir && !path.endsWith("/")){
+    throw new CommandError(`${location} refers to a directory.`);
   }
-  // if(!dogeBucket){
-  //   throw new Error(`dogeBucket: \`${dogeBucket}' or dogePath: \`${dogePath}' is invalid.`);
-  // }
+  if(!bucket){
+    throw new CommandError(`dogeBucket: \`${bucket}' or dogePath: \`${path}' is invalid.`);
+  }
+  return {
+    bucket, path
+  }
 }
 
-function recurseLog(){}
-
-// color CommandError //
+export function recurseLog(message: string){
+  tty.eraseLine;
+  console.log(`${message}...${ansi.eraseLineEnd.toString()}`);
+  tty.cursorUp(1);
+}

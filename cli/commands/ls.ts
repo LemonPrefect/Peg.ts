@@ -3,8 +3,7 @@
  * https://cloud.tencent.com/document/product/436/63668
  */
 import { Command, path, colors, os, tty, ansi } from "../common/lib.ts";
-import { chart, colorLog } from "../common/utils.ts"
-import { Config } from "../../core/main/Config.ts";
+import { chart, colorLog, configInit } from "../common/utils.ts"
 import { Bucket } from "../../core/main/Bucket.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
@@ -40,14 +39,9 @@ export default await new Command()
   .option("-r, --recursive", t("commands.ls.options.recurse"))
   
   .action(async(e, location) => {
-    let { exclude, include, limit, recursive, configPath, secretId, secretKey } = e as unknown as options;
-    if(!configPath){
-      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
-    }
+    const { exclude, include, limit, recursive, configPath, secretId, secretKey } = e as unknown as options;
     try{
-      const config = new Config(configPath);
-      Config.globalOverwrites(config, secretId, secretKey);
-
+      const config = configInit(configPath, secretId, secretKey);
       if(!location){
         colorLog("info", t("commands.ls.logs.buckets"));
         const bucket = new Bucket(config.getService());

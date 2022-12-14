@@ -26,6 +26,9 @@
   "utils": {
     "chart": {
       "total": "Total Objects: "
+    },
+    "config": {
+      "initFailed": "Config init failed with {{path}}"
     }
   }
 }
