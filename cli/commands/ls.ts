@@ -9,6 +9,7 @@ import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
 import i18n from "../common/i18n.ts";
 import { Config } from "../../core/main/Config.ts";
+import { CommandError } from "../exceptions/CommandError.ts";
 
 export interface options{
   exclude: string, 
