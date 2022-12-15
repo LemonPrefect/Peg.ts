@@ -12,6 +12,10 @@ deno install -A peg.ts
 
 而后使用 `peg config init` 进行配置文件初始化。
 
+## 本地化
+
+项目采用了 i18next 做本地化，暂时支持 en-BG, zh-CN, zh-TW, zh-HK 几种语言。可以在 /cli/locales 中新增语言文件。
+
 ## 其他
 
 请参照项目的 WIKI。
