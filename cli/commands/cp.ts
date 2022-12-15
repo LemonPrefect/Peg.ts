@@ -2,13 +2,14 @@
  * ./coscli cp <source_path> <destination_path> [option]
  * https://cloud.tencent.com/document/product/436/63669
  */
-import { Command, path, colors, os } from "./common/lib.ts";
-import { Config } from "../core/main/Config.ts";
+import { Command } from "../common/lib.ts";
+import { Config } from "../../core/main/Config.ts";
+import { colorLog, configInit } from "../common/utils.ts";
 import download from "./cp/download.ts";
 import upload from "./cp/upload.ts";
 import copy from "./cp/copy.ts";
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+import i18n from "../common/i18n.ts";
+import { CommandError } from "../exceptions/CommandError.ts";
 
 interface options{
   exclude: string, 
@@ -24,53 +25,50 @@ interface options{
   secretId: string,
   secretKey: string
 }
+const t = i18n();
 
 export default await new Command()
   .usage("<source_path> <destination_path> [option]")
-  .description("Upload, download or copy objects")
+  .description(t("commands.cp.description"))
   .example(
-    "Upload",
+    t("commands.cp.examples.upload"),
     "./peg cp ~/example.txt doge://examplebucket/example.txt"
   )
   .example(
-    "Download",
+    t("commands.cp.examples.download"),
     "./peg cp doge://examplebucket/example.txt ~/example.txt"
   )
   .example(
-    "Copy",
+    t("commands.cp.examples.copy"),
     "./peg cp doge://examplebucket1/example1.txt doge://examplebucket2/example2.txt"
   )
   
   .arguments("[paths...]")
 
-  .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
-  .option("--include <include:string>", "Exclude files that meet the specified criteria")
-  .option("--meta <meta:string>", "Set the meta information of the file", {
+  .option("--exclude <exclude:string>", t("cliche.options.exclude"))
+  .option("--include <include:string>", t("cliche.options.include"))
+  .option("--meta <meta:string>", t("commands.cp.options.meta"), {
     collect: true
   })
-  .option("--part-size <partSize:number>", "(Upload only) Specifies the block size(MB)", {
+  .option("--part-size <partSize:number>", t("commands.cp.options.partSize"), {
     default: 32
   })
-  .option("-r, --recursive", "List objects recursively")
-  .option("-s, --sign-url", "(Download/Sync only) Generate OSS signed URL, CHARGED")
-  .option("--sync", "Examine CRC64 first")
-  .option("--thread-num <threadNum:number>", "(Upload only) Specifies the number of concurrent upload threads", {
+  .option("-r, --recursive", t("commands.cp.options.recursive"))
+  .option("-s, --sign-url", t("commands.cp.options.signURL"))
+  .option("--sync", t("commands.cp.options.sync"))
+  .option("--thread-num <threadNum:number>", t("commands.cp.options.threadNum"), {
     default: 5
   })
 
   .action(async(e, ...paths) => {
-    let { configPath, secretId, secretKey } = e as unknown as options;
+    const { configPath, secretId, secretKey } = e as unknown as options;
     
-    if(!configPath){
-      configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
-    }
-
     try{
-      const config = new Config(configPath);
+      const config = configInit(configPath);
       Config.globalOverwrites(config, secretId, secretKey);
 
       if(paths.length !== 2){
-        throw new Error(`Arg(s) \`${paths}' are invalid.`);
+        throw new CommandError(t("cliche.errors.argsInvalid", { paths }), "error");
       }
 
       if(paths[0].startsWith("doge://") && !paths[1].startsWith("doge://")){
@@ -80,9 +78,9 @@ export default await new Command()
       }else if(paths[0].startsWith("doge://") && paths[1].startsWith("doge://")){
         return await copy(config, paths, e as unknown as options);
       }else{
-        throw new Error(`Arg(s) \`${paths}' are invalid.`);
+        throw new CommandError(t("cliche.errors.argsInvalid", { paths }), "error");
       }
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })
