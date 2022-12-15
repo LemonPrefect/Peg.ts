@@ -9,7 +9,7 @@ import { CommandError } from "../../exceptions/CommandError.ts";
 const t = i18n();
 const bars = progressInit(t("cliche.bars.upload"));
 
-export default async function upload(config: Config, paths: Array<string>, options: any){
+export default async function upload(config: Config, paths: Array<string>, options: Record<string, string | boolean | number | Array<string> | undefined>){
   const fullpath = path.resolve(paths[0]);
   const destination = parseDogeURL((paths[1] as string));
   const bucket = bucketInit(config, destination.bucket);
@@ -39,7 +39,7 @@ export default async function upload(config: Config, paths: Array<string>, optio
       }
     }
     
-    files = file.filterFilesLocal(files, options.include, options.exclude);
+    files = file.filterFilesLocal(files, options.include as string, options.exclude as string);
   }else{
     throw new CommandError(t("commands.cp.errors.pathInvalid", { fullpath }), "error");
   }
@@ -54,7 +54,7 @@ export default async function upload(config: Config, paths: Array<string>, optio
   const metas: Record<string, string> = {} as Record<string, string>;
   if(options.meta){
     const raw = ["Cache-Control", "Content-Disposition", "Content-Encoding", "Content-Type", "Expires", "Expect"];  
-    for(const meta of options.meta){
+    for(const meta of options.meta as Array<string>){
       const [k, v] = meta.split(":");
       if(!k || !v){
         throw new CommandError(t("commands.cp.errors.metaInvalid", { meta }), "error");
@@ -66,7 +66,7 @@ export default async function upload(config: Config, paths: Array<string>, optio
       }
     }
   }
-  return await file.uploadFiles(files, options.partSize, options.threadNum, metas, uploading);
+  return await file.uploadFiles(files, options.partSize as number, options.threadNum as number, metas, uploading);
 }
 
 function uploading(file: string, index: number, total: number, complete: number){

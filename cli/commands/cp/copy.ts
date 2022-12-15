@@ -8,7 +8,8 @@ import i18n from "../../common/i18n.ts";
 const t = i18n();
 const bars = progressInit(t("cliche.bars.copy"));
 
-export default async function copy(config: Config, paths: Array<string>, options: any){
+
+export default async function copy(config: Config, paths: Array<string>, options: Record<string, string | boolean | number | undefined>){
   const source = parseDogeURL((paths[0] as string));
   const destination = parseDogeURL((paths[1] as string));
   const bucket = bucketInit(config, source.bucket);
@@ -24,7 +25,7 @@ export default async function copy(config: Config, paths: Array<string>, options
     files = (await file.getFiles(source.path)).files.filter((file) => !file.key.endsWith("/"));
   }
   const originalFileCount = files.length;
-  files = file.filterFilesRemote(files, options.include, options.exclude);
+  files = file.filterFilesRemote(files, options.include as string, options.exclude as string);
 
   const tasks: Array<IFile> = [] as Array<IFile>;
   if(originalFileCount === 1){

@@ -4,7 +4,8 @@ import { Config } from "../../core/main/Config.ts";
 import { CommandError } from "../exceptions/CommandError.ts";
 const t = i18n();
 
-const paints: Record<string, any> = {
+// deno-lint-ignore ban-types
+const paints: Record<string, Function> = {
   "error": colors.bold.red, 
   "warn": colors.bold.yellow, 
   "info": colors.bold.blue, 

@@ -22,6 +22,7 @@ export class FileService extends DogeService{
     this.bucket = bucket;
     try{
       this.bucketDomain = await this.bucketService.getBucketDomain(bucket);
+    // deno-lint-ignore no-empty
     }catch(_e){}
     return this;
   }
@@ -46,6 +47,7 @@ export class FileService extends DogeService{
     return {files: files, continue: response.data.data.continue ?? undefined}
   }
 
+  // deno-lint-ignore ban-types
   public async uploadFiles(files: Array<IFile>, chunkSize = 32, threadLimit = 5, metas = {}, callback: Function | undefined = undefined){
     const response = requestErrorHandler(await this.query("/oss/upload/auth.json", {}, {
       "scope": `${this.bucket.alias}:*`,
@@ -115,6 +117,7 @@ export class FileService extends DogeService{
     }, false));
   }
 
+  // deno-lint-ignore ban-types
   public async downloadFile(file: IFile, sign = false, callback: Function | undefined = undefined){
     if(!file.local){
       throw new Error(`File \`${file.key}' local path MISSING.`);

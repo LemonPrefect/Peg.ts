@@ -9,7 +9,7 @@ import { CommandError } from "../../exceptions/CommandError.ts";
 const t = i18n();
 const bars = progressInit(t("cliche.bars.download"));
 
-export default async function download(config: Config, paths: Array<string>, options: any){
+export default async function download(config: Config, paths: Array<string>, options: Record<string, string | boolean | number | undefined>){
   const fullpath = path.resolve(paths[1]);
   const source = parseDogeURL((paths[0] as string));
   const bucket = bucketInit(config, source.bucket);
@@ -24,7 +24,7 @@ export default async function download(config: Config, paths: Array<string>, opt
     files = (await file.getFiles(source.path)).files.filter((file) => !file.key.endsWith("/"));
   }
   const originalFileCount = files.length;
-  files = file.filterFilesRemote(files, options.include, options.exclude);
+  files = file.filterFilesRemote(files, options.include as string, options.exclude as string);
 
   // Download a directory but the path is used by a file.
   if(files.length > 1 && fs.existsSync(fullpath) && fs.lstatSync(fullpath).isFile()){ ///fix fs => to service?
@@ -56,7 +56,7 @@ export default async function download(config: Config, paths: Array<string>, opt
     colorLog("warn", t("cliche.chargeTip"));
   }
   for(const task of tasks){
-    await file.downloadFile(task, options.signUrl, (e: number, c: number) => {
+    await file.downloadFile(task, options.signUrl as boolean, (e: number, c: number) => {
       downloading(`${task.key} => ${task.local}`, tasks.indexOf(task) + c, tasks.length, task.size, e);
     }); // qps limit!
   }
