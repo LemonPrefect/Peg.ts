@@ -79,8 +79,8 @@
         "fileOccupied": "File `{{fullpath}}' occupied.",
         "metaInvalid": "Meta `{{meta}}' is invalid.",
         "pathInvalid": "`{{fullpath}}' rather be a directory or a file to be upload.",
-        "urlShouldBeFile": "dogeurl should be a file.",
-        "urlShouldBeDir": "dogeurl should be a directory."
+        "urlShouldBeFile": "location should be a file.",
+        "urlShouldBeDir": "location should be a directory."
       },
       "logs": {
         "syncHashing": "Sync Hashing..."
@@ -147,7 +147,7 @@
         "metaIndicator": "Metas are as follow: ",
         "metaSetQuestion": "Are you sure to set these meta? Enter `set' to confirm",
         "metaSet": "`Files meta set for `{{length}}' files in `{{path}}'",
-        "metaSeting": "Setting header for {{key}}..."
+        "metaSeting": "Setting header for `{{key}}'..."
       }
     },
     "mv": {
@@ -190,7 +190,7 @@
         "deleted": "Files deleted."
       },
       "errors": {
-        "refersToDir": "{{location}} refers to a directory, `-r' to remove it.",
+        "refersToDir": "`{{location}}' refers to a directory, `-r' to remove it.",
         "checkFailed": "Files will NOT be delete."
       }
     },
@@ -269,15 +269,15 @@
       "move": "Moving files"
     },
     "recurse": {
-      "walking": "Walking {{key}}",
-      "hashing": "Hashing {{key}}",
-      "syncTimeGetting": "Getting Sync Time of {{key}}"
+      "walking": "Walking `{{key}}'",
+      "hashing": "Hashing `{{key}}'",
+      "syncTimeGetting": "Getting Sync Time of `{{key}}'"
 
     },
     "errors": {
       "argsInvalid": "Arg(s) `{{paths}}' are invalid.",
       "pathInvalid": "`{{path}}' is invalid.",
-      "refersToDir": "{{location}} refers to a directory rather than a file.",
+      "refersToDir": "`{{location}}' refers to a directory rather than a file.",
       "noFileFound": "No file found in `{{path}}'."
     }
   },
