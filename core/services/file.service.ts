@@ -22,7 +22,7 @@ export class FileService extends DogeService{
     this.bucket = bucket;
     try{
       this.bucketDomain = await this.bucketService.getBucketDomain(bucket);
-    }catch(e){}
+    }catch(_e){}
     return this;
   }
   
@@ -68,7 +68,7 @@ export class FileService extends DogeService{
         Key: `${preprefix}${file.key}`,
         FilePath: file.local!,
         ...metas,
-        onTaskStart: (taskInfo: COS.Task) => {
+        onTaskStart: (_taskInfo: COS.Task) => {
           if(callback){
             callback(`${file.local}=>${preprefix}${file.key}`, files.indexOf(file), files.length, 0);
           }
@@ -78,7 +78,7 @@ export class FileService extends DogeService{
             callback(`${file.local}=>${preprefix}${file.key}`, files.indexOf(file) + 1, files.length, Math.round(params.percent * 100));
           }
         }
-      }, (err: COS.CosError, data: COS.SliceUploadFileResult) => {
+      }, (err: COS.CosError, _data: COS.SliceUploadFileResult) => {
         if(err){
           throw err;
         }

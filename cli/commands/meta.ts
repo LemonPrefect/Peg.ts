@@ -1,5 +1,5 @@
 /** 修改文件元数据 - meta */
-import { Command, tty, ansi, Input } from "../common/lib.ts";
+import { Command, tty, Input } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";

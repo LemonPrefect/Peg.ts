@@ -1,5 +1,5 @@
 /** 查看 CDN 缓存文件 - synccheck */
-import { Command, path, colors, os, tty, ansi } from "../common/lib.ts";
+import { Command } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";

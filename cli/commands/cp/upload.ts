@@ -51,9 +51,9 @@ export default async function upload(config: Config, paths: Array<string>, optio
     });
   }
 
-  let metas: Record<string, string> = {} as Record<string, string>;
+  const metas: Record<string, string> = {} as Record<string, string>;
   if(options.meta){
-    let raw = ["Cache-Control", "Content-Disposition", "Content-Encoding", "Content-Type", "Expires", "Expect"];  
+    const raw = ["Cache-Control", "Content-Disposition", "Content-Encoding", "Content-Type", "Expires", "Expect"];  
     for(const meta of options.meta){
       const [k, v] = meta.split(":");
       if(!k || !v){

@@ -78,6 +78,9 @@ export default await new Command()
         files = (await file.getFiles(doge.path, limit)).files;
       }
       files = file.filterFilesRemote(files, include, exclude);
+      if(files.length === 0){
+        throw new CommandError(t("cliche.errors.noFileFound"), "error");
+      }
       const body: Array<Array<string>> = [] as Array<Array<string>>;
       for(const file of files){
         body.push([

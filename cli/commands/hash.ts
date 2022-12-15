@@ -30,7 +30,7 @@ export default await new Command()
   .arguments("<location:string>")
 
   .action(async(e, location) => {
-    let { signUrl, configPath, secretId, secretKey } = e as unknown as options;
+    const { signUrl, configPath, secretId, secretKey } = e as unknown as options;
     
     try{
       if(!(location as string).startsWith("doge://")){

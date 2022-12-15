@@ -1,4 +1,4 @@
-import { path, os, colors, ansi, Table, Row, Cell, progress, tty, Input } from "./lib.ts";
+import { path, os, colors, ansi, Table, Row, Cell, progress, tty } from "./lib.ts";
 import i18n from "../common/i18n.ts";
 import { Config } from "../../core/main/Config.ts";
 import { CommandError } from "../exceptions/CommandError.ts";
@@ -80,7 +80,7 @@ export function configInit(configPath: string | undefined){
   try{
     const config = new Config(configPath);
     return config;      
-  }catch(e){
+  }catch(_e){
     throw new CommandError(t("utils.config.initFailed", {
       path: configPath
     }));
