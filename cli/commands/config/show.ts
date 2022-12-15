@@ -2,36 +2,40 @@
  * ./coscli config show [-c <config-file-path>]
  * https://cloud.tencent.com/document/product/436/63679
  */
-import { Command, colors, path, os } from "../../common/lib.ts";
-import { Config } from "../../../core/main/Config.ts";
+import { Command } from "../../common/lib.ts";
 import { chart, colorLog, configInit } from "../../common/utils.ts"
+import i18n from "../../common/i18n.ts";
 
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+const t = i18n();
 
 export default await new Command()
   .usage("[option]")
-  .description("Prints information from a specified configuration file")
-  .example("Format", "./peg config show [-c <config-file-path>]")
-  .example("Show all info", "./peg config show")
+  .description(t("commands.config.show.description"))
+  .example(t("commands.config.set.examples.format"), "./peg config show [-c <config-file-path>]")
+  .example(t("commands.config.set.examples.showAllInfo"), "./peg config show")
 
   .action((e) => {
-    let { configPath } = e as unknown as { configPath: string };
+    const { configPath } = e as unknown as { configPath: string };
     try{
-      const config = configInit(configPath);
-      console.log(`Configuration file path: ${configPath}`);
-      console.log("Basic Configuration Information: ");
+      const config = configInit(configPath); //fix path display
+      colorLog("info", t("cliche.configPathIndicator", { configPath: config.getService().path }));
+      colorLog("info", t("cliche.basicConfigTitle"));
       chart([], [
         ["Secret ID", config.getConfig().secretId],
         ["Secret Key", config.getConfig().secretKey],
       ]).render();
-      console.log("Buckets: ");
+      colorLog("info", t("cliche.chartBucketTitle"));
       const body: Array<Array<string>> = [];
       for(const bucket of config.getConfig().buckets){
         body.push([bucket.name, bucket.alias, bucket.region, bucket.endpoint])
       }
-      chart(["Name", "Alias", "Region", "Endpoint"], body).render();
-  }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      chart([          
+        t("charts.bucket.name"), 
+        t("charts.bucket.alias"), 
+        t("charts.bucket.region"), 
+        t("charts.bucket.endpoint")
+      ], body).render();
+    }catch(e){
+      colorLog("error", e.message);
     }
   })

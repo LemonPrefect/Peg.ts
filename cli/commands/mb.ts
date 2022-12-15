@@ -2,13 +2,12 @@
  * ./coscli mb cos://<BucketName-APPID> -r <Region> [flag]
  * https://cloud.tencent.com/document/product/436/63145
  */
-import { Command, path, colors, os, EnumType } from "../common/lib.ts";
+import { Command, EnumType } from "../common/lib.ts";
 import { chart, colorLog, configInit } from "../common/utils.ts"
 import { Bucket } from "../../core/main/Bucket.ts";
 import { IBucket } from "../../core/interfaces/IBucket.ts";
 import { Config } from "../../core/main/Config.ts";
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+import i18n from "../common/i18n.ts";
 
 export interface options{
   region: string, 
@@ -18,24 +17,25 @@ export interface options{
   secretId: string,
   secretKey: string
 }
+const t = i18n();
 
 export default await new Command()
   .usage("<bucket-alias> [option]")
-  .description("Create bucket")
+  .description(t("commands.mb.description"))
   .example(
-    "Create standard bucket `examplebucket' in chengdu",
+    t("commands.mb.examples.createBucket"),
     "./peg mb examplebucket -r ap-chengdu -t standard"
   )
 
   .type("region", new EnumType(["ap-shanghai", "ap-beijing", "ap-guangzhou", "ap-chengdu"]))
   .type("level", new EnumType(["standard", "basic"]))
 
-  .option("-l, --level <level:level>", "Bucket type", {
+  .option("-l, --level <level:level>", t("commands.mb.options.level"), {
     required: true
   })
-  .option("-r, --region <region:region>", "Region", {
+  .option("-r, --region <region:region>", t("cliche.options.region"), {
     default: "ap-chengdu",
-      required: true
+    required: true
   })
 
   .arguments("<alias:string>")
@@ -50,14 +50,19 @@ export default await new Command()
       const buckets: Array<IBucket> = await bucket.getBuckets();
       for(const bucket of buckets){
         if(bucket.alias === alias){
-          console.log(success("[SUCCESS]"), `Bucket \`${alias}' added.`);
-          chart(["Name", "Alias", "Region", "Endpoint"], [[bucket.name, bucket.alias, bucket.region, bucket.endpoint]]).render();
-          console.log(success("[INFO]"), `Use ./peg config add ${alias} to add bucket into config.`);
+          colorLog("done", t("commands.mb.logs.created", { alias }));
+          chart([
+            t("charts.bucket.name"), 
+            t("charts.bucket.alias"), 
+            t("charts.bucket.region"), 
+            t("charts.bucket.endpoint")  
+          ], [[bucket.name, bucket.alias, bucket.region, bucket.endpoint]]).render();
+          colorLog("info", t("commands.mb.logs.hintConfig", { alias }));
           return;
         }
       }
-      console.log(error("[FAILED]"), `Bucket \`${alias}' FAILED.`);
+      console.log("error", t("commands.mb.errors.craete", { alias }));
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })

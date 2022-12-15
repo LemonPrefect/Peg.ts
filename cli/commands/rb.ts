@@ -2,14 +2,13 @@
  * ./coscli rb cos://<BucketName-APPID> -r <Region> [flag]
  * https://cloud.tencent.com/document/product/436/63667
  */
-import { Command, path, colors, os, EnumType, Input } from "../common/lib.ts";
+import { Command, EnumType, Input } from "../common/lib.ts";
 import { Bucket } from "../../core/main/Bucket.ts";
 import { IBucket } from "../../core/interfaces/IBucket.ts";
 import { Config } from "../../core/main/Config.ts";
-import { chart, configInit } from "../common/utils.ts";
-
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+import { chart, colorLog, configInit } from "../common/utils.ts";
+import i18n from "../common/i18n.ts";
+import { CommandError } from "../exceptions/CommandError.ts";
 
 export interface options{
   region: string, 
@@ -18,18 +17,19 @@ export interface options{
   secretId: string,
   secretKey: string
 }
+const t = i18n();
 
 export default await new Command()
   .usage("<bucket-alias> [option]")
-  .description("Remove bucket")
+  .description(t("commands.rb.description"))
   .example(
-    "Delete bucket `examplebucket' in chengdu",
+    t("commands.rb.examples.deleteBucket"),
     "./peg rb examplebucket -r ap-chengdu"
   )
 
   .type("region", new EnumType(["ap-shanghai", "ap-beijing", "ap-guangzhou", "ap-chengdu"]))
 
-  .option("-r, --region <region:region>", "Region", {
+  .option("-r, --region <region:region>", t("cliche.options.region"), {
     required: true
   })
 
@@ -47,22 +47,26 @@ export default await new Command()
       
       for(const _ of buckets){
         if(_.alias === alias && _.region === region){
-          chart(["Name", "Alias", "Region", "Endpoint"], [[_.name, _.alias, _.region, _.endpoint]]).render();
+          chart([
+            t("charts.bucket.name"), 
+            t("charts.bucket.alias"), 
+            t("charts.bucket.region"), 
+            t("charts.bucket.endpoint")  
+          ], [[_.name, _.alias, _.region, _.endpoint]]).render();
           const confirm: string = await Input.prompt({
-            message: `Are you sure to delete bucket ${alias}? Enter \`${alias}' to confirm`,
+            message: t("commands.rb.logs.deleteConfirm", { alias }),
           });
           if(confirm !== alias){
-            console.log(error("[FAILED]"), `Bucket \`${alias}' will NOT be delete.`);
-            return;
+            throw new CommandError(t("commands.rb.errors.checkFailed", { alias }), "error");
           }
           await bucket.deleteBucket(alias);
-          console.log(success("[SUCCESS]"), `Bucket \`${alias}' deleted.`);
-          console.log(success("[INFO]"), `Use ./peg config delete ${alias} to delete bucket in config.`);
+          colorLog("done", t("commands.rb.logs.deleted", { alias }));
+          colorLog("info", t("commands.rb.logs.hintConfig", { alias }));
           return;
         }
       }
-      console.log(error("[FAILED]"), `Bucket \`${alias}' delete FAILED.`);
+      colorLog("error", t("commands.rb.errors.deleteFailedOrNotExist", { alias }));
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })

@@ -10,6 +10,10 @@ import hash from "./cli/commands/hash.ts";
 import meta from "./cli/commands/meta.ts";
 import rm from "./cli/commands/rm.ts";
 import synccheck from "./cli/commands/synccheck.ts";
+import i18n from "./cli/common/i18n.ts";
+
+const t = i18n();
+
 
 if(import.meta.main){
   await main()
@@ -18,15 +22,15 @@ if(import.meta.main){
 async function main(){
   return await new Command()
   .name("peg")
-  .description("Welcome to use peg, a third-party open source DogeCloud OSS CLI.")
+  .description(t("welcome"))
   .version("0.0.221213.1")
   .usage("[option/command]")
   .group("Global Options")
-  .globalOption("-c, --config-path <configPath:string>", "config file path(default is $HOME/.peg.config.yaml)")
-  .globalOption("-i, --secret-id <secretId:string>", "config secretId", {
+  .globalOption("-c, --config-path <configPath:string>", t("options.configPath"))
+  .globalOption("-i, --secret-id <secretId:string>", t("options.secretId"), {
     depends: ["secret-key"]
   })
-  .globalOption("-k, --secret-key <secretKey:string>", "config secretKey", {
+  .globalOption("-k, --secret-key <secretKey:string>", t("options.secretKey"), {
     depends: ["secret-id"]
   })
   .command("config", config)

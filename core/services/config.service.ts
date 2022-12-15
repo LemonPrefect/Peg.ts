@@ -4,7 +4,7 @@ import { IBucket } from "../interfaces/IBucket.ts";
 
 export class ConfigService{
   private config: IConfig;
-  private path: string;
+  public path: string;
 
   constructor(path: string){
     this.path = path;

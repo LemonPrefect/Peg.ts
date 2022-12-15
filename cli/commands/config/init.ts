@@ -2,46 +2,45 @@
  * ./coscli config init
  * https://cloud.tencent.com/document/product/436/63679
  */
-import { Command, colors, path, os, Input } from "../../common/lib.ts";
+import { Command, path, os, Input } from "../../common/lib.ts";
 import { Config } from "../../../core/main/Config.ts";
 import { chart, colorLog } from "../../common/utils.ts"
+import i18n from "../../common/i18n.ts";
 
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+const t = i18n();
 
 export default await new Command()
   .usage("[option]")
-  .description("Used to interactively generate the configuration file")
-  .example("Format", "./peg config init [-c <config-file-path>]")
-  .example("Init a config file in ./1.yaml", "./peg config init -c ./1.yaml")
+  .description(t("commands.config.init.description"))
+  .example(t("commands.config.init.examples.init"), "./peg config init -c ./1.yaml")
   
   .action(async(e) => {
     let {configPath} = e as unknown as {configPath: string};
     if(!configPath){
       configPath = path.join(os.homeDir() ?? "./", ".peg.config.yaml");
       const _: string = await Input.prompt({
-        message: `Specify the path of the configuration file: (now:${configPath})`,
+        message: t("commands.config.init.logs.configPathSet", { configPath }),
       }) ?? configPath;
       configPath = _ ? _ : configPath;
     }else{
-      console.log(`Configuration file path: ${configPath}`);
+      colorLog("info", t("commands.config.init.logs.configPathSet", { configPath }));
     }
     const accessId: string = await Input.prompt({
-      message: "Input Your Secret ID:",
+      message: t("commands.config.init.logs.accessIdSet"),
     });
     const accessKey: string = await Input.prompt({
-      message: "Input Your Secret Key:",
+      message: t("commands.config.init.logs.accessKeySet"),
     });
     const alias: string = await Input.prompt({
-      message: `Input Bucket's Alias:`,
+      message: t("commands.config.init.logs.bucketAliasSet"),
     });
     try{
       Config.init(configPath);
       const config = new Config(configPath);
       config.setCredentials(accessId, accessKey);
       config.setDogeEndpoint("https", "api.dogecloud.com");
-      console.log(`Configuration file path: ${configPath}`);
-      console.log("Basic Configuration Information: ");
+      colorLog("info", t("cliche.configPathIndicator", { configPath }));
+      colorLog("info", t("cliche.basicConfigTitle"));
 
       chart([], [
         ["Secret ID", config.getConfig().secretId],
@@ -50,10 +49,10 @@ export default await new Command()
       if(await config.addBucket(alias)){
         const bucket = config.getBucket(alias);
         if(!bucket){
-          console.log(warn("[WARN]"), `Bucket \`${alias}' add FAILED.`);
+          colorLog("warn", t("commands.config.add.errors.add", { alias }))
           return
         }else{
-          console.log(success("[SUCCESS]"), `Bucket \`${alias}' added, config filename ${configPath}`);
+          colorLog("done", t("commands.config.add.logs.added", { alias }));
           chart(["Name", "Alias", "Region", "Endpoint"], [[
             bucket.name, 
             bucket.alias, 
@@ -62,9 +61,9 @@ export default await new Command()
           ]]).render();  
         }
       }else{
-        console.log(warn("[WARN]"), `Bucket \`${alias}' FAILED to add as it's not exist in endpoint.`);
+        colorLog("warn", t("cliche.notInEndpoint", { alias }));
       }
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })

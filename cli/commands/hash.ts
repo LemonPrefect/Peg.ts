@@ -2,13 +2,13 @@
  * ./coscli hash <file-path> [--type <hash-type>]
  * https://www.tencentcloud.com/zh/document/product/436/43259
  */
-import { Command, path, colors, os } from "../common/lib.ts";
+import { Command, path } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
-import { bucketInit, configInit, parseDogeURL } from "../common/utils.ts";
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+import { bucketInit, colorLog, configInit, parseDogeURL } from "../common/utils.ts";
+import i18n from "../common/i18n.ts";
+import { CommandError } from "../exceptions/CommandError.ts";
 
 interface options{
   signUrl: boolean,
@@ -17,15 +17,16 @@ interface options{
   secretId: string,
   secretKey: string
 }
+const t = i18n();
 
 export default await new Command()
   .usage("<path> [option]")
-  .description("Calculate local file's hash-code or show cos file's hash-code")
+  .description(t("commands.hash.description"))
   .example(
-    "hash for `example.file' in test/ of bucket `example'",
+    t("commands.hash.description"),
     "./peg hash doge://example/test/example.file"
   )
-  .option("-s, --sign-url", "Generate hash with OSS signed URL, CHARGED")
+  .option("-s, --sign-url", t("commands.hash.options.signURL"))
   .arguments("<location:string>")
 
   .action(async(e, location) => {
@@ -33,11 +34,11 @@ export default await new Command()
     
     try{
       if(!(location as string).startsWith("doge://")){
-        console.log(success("[SUCCESS]"), await File.getHashLocal({local: path.resolve(location as string)} as IFile));
+        colorLog("done", await File.getHashLocal({local: path.resolve(location as string)} as IFile));
         return;
       }
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
 
     try{
@@ -45,20 +46,20 @@ export default await new Command()
       Config.globalOverwrites(config, secretId, secretKey);
       const doge = parseDogeURL(location as string);
       if(doge.path.endsWith("/")){
-        throw new Error(`${location} refers to a directory.`);
+        throw new CommandError(t("cliche.errors.refersToDir", { location }), "error");
       }
       const bucket = bucketInit(config, doge.bucket);
       const file = new File(config.getService(), bucket);
       const files: Array<IFile> = (await file.getFiles(doge.path, 1)).files;
       if(files.length !== 1){
-        throw new Error("No file found!");
+        throw new CommandError(t("commands.hash.errors.noFileFound", { location }), "error");
       }
-      console.log(success("[SUCCESS]"), await file.getHashRemote(files[0], signUrl));
+      colorLog("done", await file.getHashRemote(files[0], signUrl) ?? t("commands.hash.logs.noHash"));
       
       if(signUrl){
-        console.log(warn("[WARN]"), "This hash is using sign-url which CHARGED for CNY0.5/GB/DAY");
+        colorLog("warn", t("cliche.chargeTip"));
       }
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })

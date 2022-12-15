@@ -3,10 +3,9 @@ import { Command, path, colors, os, tty, ansi } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
-import { bucketInit, chart, configInit, parseDogeURL, recurseLog } from "../common/utils.ts";
-
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+import { bucketInit, chart, colorLog, configInit, parseDogeURL, recurseLog } from "../common/utils.ts";
+import { CommandError } from "../exceptions/CommandError.ts";
+import i18n from "../common/i18n.ts";
 
 interface options{
   url: boolean,
@@ -18,18 +17,19 @@ interface options{
   secretId: string,
   secretKey: string
 }
+const t = i18n();
 
 export default await new Command()
   .usage("<bucket-uri> [option]")
-  .description("Check the unsync cache of CDN")
+  .description(t("commands.synccheck.description"))
   .example(
-    "Check files",
+    t("commands.synccheck.examples.checkFiles"),
     "./peg synccheck doge://bucket/fonts/ -r --include .*.otf doge://bucket/fonts2/"
   )
-  .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
-  .option("--include <include:string>", "List files that meet the specified criteria")
-  .option("-r, --recursive", "Set meta for objects recursively")
-  .option("--url", "Print url only of files needed update cache")
+  .option("--exclude <exclude:string>", t("cliche.options.exclude"))
+  .option("--include <include:string>", t("cliche.options.include"))
+  .option("-r, --recursive", t("commands.synccheck.options.recursive"))
+  .option("--url", t("commands.synccheck.options.url"))
   .arguments("[paths...]")
 
   .action(async(e, ...paths) => {
@@ -42,7 +42,7 @@ export default await new Command()
 
       for(const path of paths){
         if(!(path as string).startsWith("doge://")){
-          throw new Error(`${path} is invalid.`);
+          throw new CommandError(t("cliche.errors.pathInvalid", { path }));
         }
 
         const doge = parseDogeURL(path as string);
@@ -53,19 +53,17 @@ export default await new Command()
           files = (await file.getFiles(doge.path)).files.filter((file) => !file.key.endsWith("/"));
         }else{
           files = await file.getFilesRecurse(doge.path, (key: string) => {
-            recurseLog(`Walking ${key}`);
+            recurseLog(t("cliche.recurse.walking", { key }));
           });
         }
         files = file.filterFilesRemote(files, include, exclude);
         if(files.length === 0){
-          console.log(warn("[WARN]"), `No file found in \`${doge.path}'!`);
+          colorLog("warn", t("cliche.errors.noFileFound", { path }));
           continue;
         }
-        let body: Array<Array<string> | string> = [] as Array<Array<string> | string>;
+        const body: Array<Array<string> | string> = [] as Array<Array<string> | string>;
         for(const task of files){
-          tty.eraseLine;
-          console.log(`Getting Sync Time of ${task.key}...${ansi.eraseLineEnd.toString()}`);
-          tty.cursorUp(1);
+          recurseLog(t("cliche.recurse.syncTimeGetting", { key: task.key }));
           const cacheTime: string = await file.getSyncTime(task);
           if(task.time !== cacheTime){
             if(url){
@@ -80,20 +78,24 @@ export default await new Command()
           }
         }
         if(body.length === 0){
-          console.log(success("[SUCCESS]"), `No file unsync cached in \`${doge.path}'!${ansi.eraseLineEnd.toString()}`);
+          colorLog("done", t("commands.synccheck.logs.noUnsynced", { path: doge.path }));
           continue;
         }else{
-          console.log(success("[SUCCESS]"), `These files unsync cached in \`${doge.path}'!${ansi.eraseLineEnd.toString()}`);
+          colorLog("done", t("commands.synccheck.logs.hasUnsynced", { path: doge.path }));
         }
         if(url){
           for(const url of body){
-            console.log(url);
+            colorLog("done", url as string);
           }
         }else{
-          chart(["Key", "Last Modified", "Last Cached"], body as Array<Array<string>>, true, body.length).render();
+          chart([
+            t("charts.file.key"),
+            t("charts.file.lastModified"),
+            t("charts.file.lastCached")
+          ], body as Array<Array<string>>, true, body.length).render();
         }
       }
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })

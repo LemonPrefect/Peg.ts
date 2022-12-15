@@ -2,15 +2,13 @@
  * ./coscli rm cos://<bucketAlias>[/prefix/] [cos://<bucket-name>[/prefix/]...] [flag]
  * https://www.tencentcloud.com/zh/document/product/436/43258
  */
-import { Command, path, colors, os, tty, ansi, Input } from "../common/lib.ts";
-
+import { Command, Input } from "../common/lib.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
 import { Config } from "../../core/main/Config.ts";
-import { bucketInit, chart, configInit, parseDogeURL } from "../common/utils.ts";
-
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+import { bucketInit, chart, colorLog, configInit, parseDogeURL, recurseLog } from "../common/utils.ts";
+import i18n from "../common/i18n.ts";
+import { CommandError } from "../exceptions/CommandError.ts";
 
 interface options{
   exclude: string, 
@@ -22,20 +20,21 @@ interface options{
   secretId: string,
   secretKey: string
 }
+const t = i18n();
 
 export default await new Command()
   .usage("<bucket-uri> [option]")
-  .description("Remove objects")
+  .description(t("commands.rm.description"))
   .example(
-    "Remove all files in test/ of bucket `example'",
+    t("commands.rm.examples.deleteAllFile"),
     "./peg rm doge://example/test/ -r"
   )
   
   .arguments("[paths...]")
 
-  .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
-  .option("--include <include:string>", "Exclude files that meet the specified criteria")
-  .option("-r, --recursive", "Delete object recursively")
+  .option("--exclude <exclude:string>", t("cliche.options.exclude"))
+  .option("--include <include:string>", t("cliche.options.include"))
+  .option("-r, --recursive", t("commands.rm.options.recursive"))
 
   .action(async(e, ...paths) => {
     const { exclude, include, recursive, configPath, secretId, secretKey } = e as unknown as options;
@@ -51,21 +50,21 @@ export default await new Command()
         let tasks: Array<IFile> = [] as Array<IFile>;
 
         if(doge.path.endsWith("/") && !recursive){
-          throw new Error(`${dogeurl} refers to a directory, \`-r' to remove it.`);
+          throw new CommandError(t("commands.rm.errors.refersToDir", { location: dogeurl}), "error");
         }
 
         if(recursive){
           tasks = await file.getFilesRecurse(doge.path, (key: string) => {
-            tty.eraseLine;
-            console.log(`Walking ${key}...${ansi.eraseLineEnd.toString()}`);
-            tty.cursorUp(1);
+            recurseLog(t("cliche.recurse.walking", { key }));
           });
         }else{
           tasks = (await file.getFiles(doge.path)).files.filter((file) => !file.key.endsWith("/"));
         }
         tasks = file.filterFilesRemote(tasks, include, exclude);
-
-        console.log(warn("These files will be deleted!"));
+        if(tasks.length === 0){
+          throw new CommandError(t("cliche.errors.noFileFound", { path: doge.path }), "error");
+        }
+        colorLog("warn", t("commands.rm.logs.deletePre"));
         const body: Array<Array<string>> = [] as Array<Array<string>>;
         for(const task of tasks){
           body.push([
@@ -75,18 +74,23 @@ export default await new Command()
             File.formatBytes(task.size)
           ])
         }
-        chart(["Key", "Type", "Last Modified", "Size"], body, true, tasks.length).render();
+        chart([
+          t("charts.file.key"),
+          t("charts.file.type"),
+          t("charts.file.lastModified"),
+          t("charts.file.size")  
+        ], body, true, tasks.length).render();
         const confirm: string = await Input.prompt({
-          message: `Are you sure to delete them? Enter \`delete' to confirm`,
+          message: t("commands.rm.logs.deleteConfirm"),
         });
         if(confirm !== "delete"){
-          console.log(error("[FAILED]"), `Files will NOT be delete.`);
+          colorLog("error", t("commands.rm.errors.checkFailed"));
           return;
         }
         await file.deleteFiles(tasks);
-        console.log(success("[SUCCESS]"), `Files deleted.`);
+        colorLog("done", t("commands.rm.logs.deleted"));
       }
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })

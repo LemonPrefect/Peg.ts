@@ -2,33 +2,33 @@
  * ./coscli signurl cos://<bucketAlias>/<key> [flag]
  * https://tencentcloud.com/zh/document/product/436/43263
  */
-import { Command, path, colors, os } from "../common/lib.ts";
-
+import { Command } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
-import { bucketInit, configInit, parseDogeURL } from "../common/utils.ts";
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+import { bucketInit, colorLog, configInit, parseDogeURL } from "../common/utils.ts";
+import { CommandError } from "../exceptions/CommandError.ts";
+import i18n from "../common/i18n.ts";
 
 interface options{
   configPath: string,
   secretId: string,
   secretKey: string
 }
+const t = i18n();
 
 export default await new Command()
   .usage("<bucket-uri> [option]")
-  .description("(CHARGED) Query sign url for 10s")
+  .description(t("commands.signurl.description"))
   .example(
-    "sign url for `example.file' in test/ of bucket `example'",
+    t("commands.signurl.examples.signurl"),
     "./peg signurl doge://example/test/example.file"
   )
   
   .arguments("<location:string>")
 
   .action(async(e, location) => {
-    let { configPath, secretId, secretKey } = e as unknown as options;
+    const { configPath, secretId, secretKey } = e as unknown as options;
     
     try{
       const config = configInit(configPath);
@@ -36,7 +36,7 @@ export default await new Command()
 
       const doge = parseDogeURL(location as string);
       if(doge.path.endsWith("/")){
-        throw new Error(`${location} refers to a directory.`);
+        throw new CommandError(t("cliche.errors.refersToDir", { location }), "error");
       }
 
       const bucket = bucketInit(config, doge.bucket);
@@ -44,12 +44,12 @@ export default await new Command()
       const file = new File(config.getService(), bucket);
       const files: Array<IFile> = (await file.getFiles(doge.path, 1)).files;
       if(files.length !== 1){
-        throw new Error("No file found!");
+        throw new CommandError(t("cliche.errors.noFileFound", { path: doge.path }), "error");
       }
-      console.log(success("[SUCCESS]"), await file.getUrl(files[0], true));
-      console.log(warn("[WARN]"), "This url is CHARGED for CNY0.5/GB/DAY");
+      colorLog("done", await file.getUrl(files[0], true));
+      colorLog("warn", t("cliche.chargeTip"));
 
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })

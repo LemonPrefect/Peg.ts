@@ -1,11 +1,11 @@
 /** 修改文件元数据 - meta */
-import { Command, path, colors, os, tty, ansi, Input } from "../common/lib.ts";
+import { Command, tty, ansi, Input } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
-import { bucketInit, chart, configInit, parseDogeURL, recurseLog } from "../common/utils.ts";
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+import { bucketInit, chart, colorLog, configInit, parseDogeURL, recurseLog } from "../common/utils.ts";
+import i18n from "../common/i18n.ts";
+import { CommandError } from "../exceptions/CommandError.ts";
 
 interface options{
   meta: Array<string>,
@@ -17,26 +17,27 @@ interface options{
   secretId: string,
   secretKey: string
 }
+const t = i18n();
 
 export default await new Command()
   .usage("<bucket-uri> [option]")
-  .description("Set the control meta of files")
+  .description(t("commands.meta.description"))
   .example(
-    "Set meta and delete meta of files",
+    t("commands.meta.examples.metaSetSome"),
     './peg meta doge://bucket/1.txt doge://bucket/1.pptx --meta "-Cache-Control" --meta "Content-Type:text/plain"'
   )
   .example(
-    "Set meta and delete meta of files recursively",
+    t("commands.meta.examples.metaSetRecurse"),
     './peg meta doge://bucket/ -r --include .*.otf --meta "-Cache-Control" --meta "Content-Type:text/plain"'
   )
   
-  .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
-  .option("--include <include:string>", "List files that meet the specified criteria")
-  .option("--meta <meta:string>", "Set the meta information of the file", {
+  .option("--exclude <exclude:string>", t("cliche.options.exclude"))
+  .option("--include <include:string>", t("cliche.options.include"))
+  .option("--meta <meta:string>", t("commands.meta.options.meta"), {
     collect: true,
     required: true
   })
-  .option("-r, --recursive", "Set meta for objects recursively")
+  .option("-r, --recursive", t("commands.meta.options.recursive"))
   .arguments("[paths...]")
 
   .action(async(e, ...paths) => {
@@ -48,7 +49,7 @@ export default await new Command()
 
       for(const path of paths){
         if(!(path as string).startsWith("doge://")){
-          throw new Error(`${path} is invalid.`);
+          throw new CommandError(t("cliche.errors.pathInvalid", { path }), "error");
         }
         
         const doge = parseDogeURL(path as string);
@@ -59,13 +60,13 @@ export default await new Command()
           files = (await file.getFiles(doge.path)).files.filter(file => !file.key.endsWith("/"));
         }else{
           files = await file.getFilesRecurse(doge.path, (key: string) => {
-            recurseLog(`Walking ${key}`);
+            recurseLog(t("cliche.recurse.walking", { key }));
           });
         }
         files = file.filterFilesRemote(files, include, exclude);
         files = (await file.getFilesInfo(files.map(file => file.key)));
         if(files.length === 0){
-          console.log(warn("[WARN]"), `No file found in \`${doge.path}'!`);
+          colorLog("warn", t("cliche.errors.noFileFound", { path: doge.path }));
           continue;
         }
 
@@ -77,7 +78,7 @@ export default await new Command()
           }else{
             const [k, v] = header.split(":");
             if(!k || !v){
-              throw new Error(`${header} is invalid.`);
+              throw new CommandError(t("commands.meta.errors.headerInvalid", { header }), "error");
             }
             addHeaders.push({
               key: k,
@@ -85,7 +86,7 @@ export default await new Command()
             })
           }
         }
-        console.log(info("[INFO]"), "These files will be meta set!");
+        colorLog("info", t("commands.meta.logs.metaSetPre"));
         let body: Array<Array<string>> = [] as Array<Array<string>>;
         for(const task of files){
           body.push([
@@ -95,13 +96,18 @@ export default await new Command()
             File.formatBytes(task.size),
           ])
         }
-        chart(["Key", "Type", "Last Modified", "Size"], body, true, files.length).render();
-        console.log(info("[INFO]"), "Metas are as follow: ");
+        chart([
+          t("charts.bucket.name"), 
+          t("charts.bucket.alias"), 
+          t("charts.bucket.region"), 
+          t("charts.bucket.endpoint")  
+        ], body, true, files.length).render();
+        colorLog("info", t("commands.meta.logs.metaIndicator"));
         body = [];
         for(const key of deleteKeys){
           body.push([
             key,
-            "DELETE"
+            "-"
           ]);
         }
         for(const header of addHeaders){
@@ -110,23 +116,26 @@ export default await new Command()
             header.value.toString()
           ]);
         }
-        chart(["Meta", "Change"], body, true, -1).render();
+        chart([
+          t("charts.meta.meta"), 
+          t("charts.meta.change"), 
+        ], body, true, -1).render();
 
         const confirm: string = await Input.prompt({
-          message: `Are you sure to set these meta? Enter \`set' to confirm`,
+          message: t("commands.meta.logs.metaSetQuestion"),
         });
         if(confirm !== "set"){
-          console.log(error("[FAILED]"), `Files meta will NOT be set.`);
+          colorLog("error", t("commands.meta.errors.checkFailed"));
           continue;
         }
-        for(const task of files){
-          console.log(`Setting header for ${task.key}...${ansi.eraseLineEnd.toString()}`);
+        for(const task of files){///
+          colorLog("info", t("commands.meta.logs.metaSeting", { key: task.key }));
           tty.cursorUp(1);      
           file.setFileHeaders(task, addHeaders, deleteKeys);
         }
-        console.log(success("[SUCCESS]"), `Files meta set for ${files.length} files in \`${doge.path}'${ansi.eraseLineEnd.toString()}`);
+        colorLog("done", t("commands.meta.logs.metaSet", { length: files.length, path: doge.path }));
       }
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })

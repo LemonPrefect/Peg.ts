@@ -1,4 +1,4 @@
-import { path, os, colors, ansi, Table, Row, Cell, progress, tty } from "./lib.ts";
+import { path, os, colors, ansi, Table, Row, Cell, progress, tty, Input } from "./lib.ts";
 import i18n from "../common/i18n.ts";
 import { Config } from "../../core/main/Config.ts";
 import { CommandError } from "../exceptions/CommandError.ts";
@@ -8,7 +8,7 @@ const paints: Record<string, any> = {
   "error": colors.bold.red, 
   "warn": colors.bold.yellow, 
   "info": colors.bold.blue, 
-  "success": colors.bold.green
+  "done": colors.bold.green
 };
 
 export function chart(header: Array<string>, body: Array<Array<string>>, list = false, objectCount = 0){
@@ -70,7 +70,7 @@ export function progressInit(title: string){
 export function bucketInit(config: Config, bucketAlias: string){
   const bucket = config.getBucket(bucketAlias);
   if(!bucket){
-    throw new CommandError(`Bucket \`${bucketAlias}' doesn't exist.`);
+    throw new CommandError(t("utils.bucket.notExist", { bucketAlias }));
   }
   return bucket;
 }
@@ -90,7 +90,7 @@ export function configInit(configPath: string | undefined){
 export function parseDogeURL(url: string){
   const [bucket, path] = url.match(new RegExp("doge://([A-z0-9\-]*)/?(.*)", "im"))!.slice(1);
   if(!bucket){
-    throw new CommandError(`dogeBucket: \`${bucket}' or dogePath: \`${path}' is invalid.`);
+    throw new CommandError(t("utils.url.invalid", { bucket, path }));
   }
   return {
     bucket, path

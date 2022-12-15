@@ -1,13 +1,11 @@
 
-import { Command, path, colors, os, tty, ansi, progress } from "../common/lib.ts";
+import { Command, path } from "../common/lib.ts";
 import { Config } from "../../core/main/Config.ts";
 import { File } from "../../core/main/File.ts"
 import { IFile } from "../../core/interfaces/IFile.ts";
-import { bucketInit, configInit, parseDogeURL, progressInit, recurseLog } from "../common/utils.ts";
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
-
-const bars = progressInit("Moving files");
+import { bucketInit, colorLog, configInit, parseDogeURL, progressInit, recurseLog } from "../common/utils.ts";
+import { CommandError } from "../exceptions/CommandError.ts";
+import i18n from "../common/i18n.ts";
 
 interface options{
   exclude: string, 
@@ -19,25 +17,27 @@ interface options{
   secretId: string,
   secretKey: string
 }
+const t = i18n();
+const bars = progressInit(t("cliche.bars.move"));
 
 export default await new Command()
   .usage("<source_path> <destination_path> [option]")
-  .description("Move objects")
+  .description(t("commands.mv.description"))
   .example(
-    "Move file",
+    t("commands.mv.examples.moveFile"),
     "./peg mv doge://examplebucket1/example1.txt doge://examplebucket2/example2.txt"
   )
   .example(
-    "Move files from a to b",
+    t("commands.mv.examples.moveFiles"),
     "./peg mv doge://examplebucket1/a doge://examplebucket2/b"
   )
   .arguments("[paths...]")
 
 
-  .option("--exclude <exclude:string>", "Exclude files that meet the specified criteria")
-  .option("-f, --force", "Move file overwritely")
-  .option("--include <include:string>", "Exclude files that meet the specified criteria")
-  .option("-r, --recursive", "Move objects recursively")
+  .option("--exclude <exclude:string>", t("cliche.options.exclude"))
+  .option("-f, --force", t("commands.mv.options.force"))
+  .option("--include <include:string>", t("cliche.options.include"))
+  .option("-r, --recursive", t("commands.mv.options.recursive"))
 
   .action(async(e, ...paths) => {
     const { exclude, include, recursive, force, configPath, secretId, secretKey } = e as unknown as options;
@@ -47,7 +47,7 @@ export default await new Command()
       Config.globalOverwrites(config, secretId, secretKey);
 
       if(paths.length !== 2 || !paths[0].startsWith("doge://") || !paths[1].startsWith("doge://")){
-        throw new Error(`Arg(s) \`${paths}' are invalid.`);
+        throw new CommandError(t("cliche.errors.argsInvalid", { paths }), "error");
       }
 
       const source = parseDogeURL((paths[0] as string));
@@ -59,7 +59,7 @@ export default await new Command()
     
       if(recursive){
         files = await file.getFilesRecurse(source.path, (key: string) => {
-          recurseLog(`Walking ${key}`);
+          recurseLog(t("cliche.recurse.walking", { key }));
         });
       }else{
         files = (await file.getFiles(source.path)).files.filter((file) => !file.key.endsWith("/"));
@@ -83,7 +83,7 @@ export default await new Command()
         moving(`${source.bucket}/${task.key} => ${destination.bucket}/${task.local}`, tasks.indexOf(task) + 1, tasks.length)
       }    
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })
 

@@ -1,10 +1,12 @@
-import { tty, path, ansi, progress } from "../../common/lib.ts";
+import { path } from "../../common/lib.ts";
 import { Config } from "../../../core/main/Config.ts";
 import { File } from "../../../core/main/File.ts"
 import { IFile } from "../../../core/interfaces/IFile.ts";
-import { bucketInit, parseDogeURL, progressInit } from "../../common/utils.ts";
+import { bucketInit, parseDogeURL, progressInit, recurseLog } from "../../common/utils.ts";
+import i18n from "../../common/i18n.ts";
 
-const bars = progressInit("Copying files");
+const t = i18n();
+const bars = progressInit(t("cliche.bars.copy"));
 
 export default async function copy(config: Config, paths: Array<string>, options: any){
   const source = parseDogeURL((paths[0] as string));
@@ -16,9 +18,7 @@ export default async function copy(config: Config, paths: Array<string>, options
 
   if(options.recursive){
     files = await file.getFilesRecurse(source.path, (key: string) => {
-      tty.eraseLine;
-      console.log(`Walking ${key}...${ansi.eraseLineEnd.toString()}`);
-      tty.cursorUp(1);
+      recurseLog(t("cliche.recurse.walking", { key }));
     });
   }else{
     files = (await file.getFiles(source.path)).files.filter((file) => !file.key.endsWith("/"));

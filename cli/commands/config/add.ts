@@ -2,39 +2,46 @@
  * ./coscli config add -b <bucket-name> -e <endpoint> -a <alias> [-c <config-file-path>]
  * https://cloud.tencent.com/document/product/436/63679
  */
-import { Command, colors, path, os } from "../../common/lib.ts";
-import { Config } from "../../../core/main/Config.ts";
-import { chart, configInit } from "../../common/utils.ts";
+import { Command } from "../../common/lib.ts";
+import { chart, colorLog, configInit } from "../../common/utils.ts";
+import i18n from "../../common/i18n.ts";
+import { CommandError } from "../../exceptions/CommandError.ts";
 
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+const t = i18n();
+interface options{
+  alias: string, 
+  configPath: string
+}
 
 export default await new Command()
   .usage("[option]")
-  .description("Used to add a new bucket configuration")
-  .example("Format", "./peg config add -a <alias> [-c <config-file-path>]")
-  .example("Add bucket", "./peg config add -a example")
+  .description(t("commands.config.add.description"))
+  .example(t("commands.config.add.examples.addBucket"), "./peg config add -a example")
 
-  .option("-a, --alias <alias:string>", "Bucket alias", {
+  .option("-a, --alias <alias:string>", t("commands.config.add.options.alias"), {
     required: true
   })
 
   .action(async(e) => {
-    let {alias, configPath} = e as {alias: string, configPath: string};
+    const { alias, configPath } = e as options;
     try{
       const config = configInit(configPath);
       if(await config.addBucket(alias)){
         const bucket = config.getBucket(alias);
         if(!bucket){
-          console.log(error("[ERROR]"), `Bucket \`${alias}' add FAILED.`);
-          return;
+          throw new CommandError(t("commands.config.add.errors.add", { alias }), "error");
         }
-        console.log(success("[SUCCESS]"), `Bucket \`${alias}' added, config filename ${configPath}`);
-        chart(["Name", "Alias", "Region", "Endpoint"], [[bucket.name, bucket.alias, bucket.region, bucket.endpoint]]).render();
+        colorLog("done", t("commands.config.add.logs.added", { alias }));
+        chart([
+          t("charts.bucket.name"), 
+          t("charts.bucket.alias"), 
+          t("charts.bucket.region"), 
+          t("charts.bucket.endpoint")
+        ], [[bucket.name, bucket.alias, bucket.region, bucket.endpoint]]).render();
       }else{
-        console.log(error("[FAILED]"), `Bucket \`${alias}' FAILED to add as it's not exist in endpoint.`);
+        colorLog("error", t("commands.config.add.errors.notInEndpoint", { alias }));
       }
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })

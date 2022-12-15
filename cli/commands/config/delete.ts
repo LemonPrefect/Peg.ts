@@ -2,32 +2,35 @@
  * ./coscli config delete -a <alias> [-c <config-file-path>]
  * https://cloud.tencent.com/document/product/436/63679
  */
-import { Command, colors, path, os } from "../../common/lib.ts";
-import { Config } from "../../../core/main/Config.ts";
-import { bucketInit, chart, configInit } from "../../common/utils.ts";
+import { Command } from "../../common/lib.ts";
+import { bucketInit, chart, colorLog, configInit } from "../../common/utils.ts";
+import i18n from "../../common/i18n.ts";
 
-
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
+const t = i18n();
 
 export default await new Command()
   .usage("[option]")
-  .description("Used to delete an existing bucket")
-  .example("Format", "./peg config delete -a <alias> [-c <config-file-path>]")
-  .example("Delete an existing bucket", "./peg config delete -a example")
+  .description(t("commands.config.delete.description"))
+  .example(t("commands.config.delete.examples.deleteBucket"), "./peg config delete -a example")
   
-  .option("-a, --alias <alias:string>", "Bucket alias", {
+  .option("-a, --alias <alias:string>", t("commands.config.delete.options.alias"), {
     required: true
   })
 
   .action((e) => {
-    let {alias, configPath} = e as {alias: string, configPath: string};
+    const {alias, configPath} = e as {alias: string, configPath: string};
     try{
       const config = configInit(configPath);
       const bucket = bucketInit(config, alias);
       config.deleteBucket(alias);
-      console.log(success("[SUCCESS]"), `Bucket \`${alias}' deleted, showed as follow, config filename ${configPath}`);
-      chart(["Name", "Alias", "Region", "Endpoint"], [[bucket.name, bucket.alias, bucket.region, bucket.endpoint]]).render();
+      colorLog("done", t("commands.config.delete.logs.deleted", { alias }));
+      chart([
+        t("charts.bucket.name"), 
+        t("charts.bucket.alias"), 
+        t("charts.bucket.region"), 
+        t("charts.bucket.endpoint")
+      ], [[bucket.name, bucket.alias, bucket.region, bucket.endpoint]]).render();
     }catch(e){
-      console.log(error("[ERROR]"), e.message);
+      colorLog("error", e.message);
     }
   })

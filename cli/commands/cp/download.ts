@@ -1,12 +1,13 @@
-import { tty, path, ansi, progress, colors, fs } from "../../common/lib.ts";
+import { tty, path, fs } from "../../common/lib.ts";
 import { Config } from "../../../core/main/Config.ts";
 import { File } from "../../../core/main/File.ts"
 import { IFile } from "../../../core/interfaces/IFile.ts";
-import { bucketInit, parseDogeURL, progressInit } from "../../common/utils.ts";
+import { bucketInit, colorLog, parseDogeURL, progressInit, recurseLog } from "../../common/utils.ts";
+import i18n from "../../common/i18n.ts";
+import { CommandError } from "../../exceptions/CommandError.ts";
 
-const bars = progressInit("Downloading files");
-const {error, warn, info, success} = {error: colors.bold.red, warn: colors.bold.yellow, info: colors.bold.blue, success: colors.bold.green};
-
+const t = i18n();
+const bars = progressInit(t("cliche.bars.download"));
 
 export default async function download(config: Config, paths: Array<string>, options: any){
   const fullpath = path.resolve(paths[1]);
@@ -17,9 +18,7 @@ export default async function download(config: Config, paths: Array<string>, opt
 
   if(options.recursive){
     files = await file.getFilesRecurse(source.path, (key: string) => {
-      tty.eraseLine;
-      console.log(`Walking ${key}...${ansi.eraseLineEnd.toString()}`);
-      tty.cursorUp(1);
+      recurseLog(t("cliche.recurse.walking", { key }));
     });
   }else{
     files = (await file.getFiles(source.path)).files.filter((file) => !file.key.endsWith("/"));
@@ -28,8 +27,8 @@ export default async function download(config: Config, paths: Array<string>, opt
   files = file.filterFilesRemote(files, options.include, options.exclude);
 
   // Download a directory but the path is used by a file.
-  if(files.length > 1 && fs.existsSync(fullpath) && fs.lstatSync(fullpath).isFile()){
-    throw new Error(`File ${fullpath} occupied.`);
+  if(files.length > 1 && fs.existsSync(fullpath) && fs.lstatSync(fullpath).isFile()){ ///fix fs => to service?
+    throw new CommandError(t("command.cp.errors.fileOccupied"), "error");
   }
 
   let tasks: Array<IFile> = [] as Array<IFile>;
@@ -44,19 +43,17 @@ export default async function download(config: Config, paths: Array<string>, opt
   }
 
   if(options.sync){
-    console.log(`Sync Hashing...${ansi.eraseLineEnd.toString()}`);
+    colorLog("info", t("command.cp.logs.syncHashing"));
     tty.cursorUp(1);
     tasks = await file.syncFilter(tasks, options.signUrl === true, (file: IFile) => {
-      tty.eraseLine;
-      console.log(`Hashing ${file.key}...${ansi.eraseLineEnd.toString()}`);
-      tty.cursorUp(1);
+      recurseLog(t("cliche.recurse.hashing", { key: file.key }));
     });
   }
   if(files.length === 0){
-    throw new Error("No file found.");
+    throw new CommandError(t("command.cp.errors.noFileToDownload"), "error");
   }
   if(options.signUrl){
-    console.log(warn("[WARN]"), "This url is CHARGED for CNY0.5/GB/DAY");
+    colorLog("warn", t("cliche.chargeTip"));
   }
   for(const task of tasks){
     await file.downloadFile(task, options.signUrl, (e: number, c: number) => {
