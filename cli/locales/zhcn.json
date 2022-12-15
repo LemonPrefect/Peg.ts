@@ -27,7 +27,7 @@
           "alias": "存储桶别名"
         },
         "logs": {
-          "deleted": "存储桶 `{{alias}}' 的配置（如下）已经从配置中删除。"
+          "deleted": "存储桶 `{{alias}}' 的配置(如下)已经从配置中删除。"
         }
       },
       "init": {
@@ -43,7 +43,7 @@
         }
       },
       "set": {
-        "description": "修改配置文件基础组的信息（鉴权）",
+        "description": "修改配置文件基础组的信息(鉴权)",
         "examples": {
           "credentialSet": "设置鉴权凭证"
         },
@@ -59,7 +59,7 @@
       }
     },
     "cp": {
-      "description": "上传、下载、（同地域桶中/桶间）复制存储对象",
+      "description": "上传、下载、(同地域桶中/桶间)复制存储对象",
       "examples": {
         "upload": "上传文件",
         "download": "下载文件",

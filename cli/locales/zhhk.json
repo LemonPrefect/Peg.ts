@@ -27,7 +27,7 @@
           "alias": "存儲桶別名"
         },
         "logs": {
-          "deleted": "存儲桶 `{{alias}}' 的配置（如下）已經從配置中刪除。"
+          "deleted": "存儲桶 `{{alias}}' 的配置(如下)已經從配置中刪除。"
         }
       },
       "init": {
@@ -43,7 +43,7 @@
         }
       },
       "set": {
-        "description": "修改配置文件基礎組的信息（鑑權）",
+        "description": "修改配置文件基礎組的信息(鑑權)",
         "examples": {
           "credentialSet": "設置鑑權憑證"
         },
@@ -59,7 +59,7 @@
       }
     },
     "cp": {
-      "description": "上傳、下載、（同地域桶中/桶間）複製存儲對象",
+      "description": "上傳、下載、(同地域桶中/桶間)複製存儲對象",
       "examples": {
         "upload": "上傳文件",
         "download": "下載文件",
