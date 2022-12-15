@@ -13,7 +13,6 @@
           "alias": "Bucket alias"
         },
         "errors": {
-          "notInEndpoint": "Bucket `{{alias}}' failed to add as it isn't exist in such endpoint."
         },
         "logs": {
           "added": "Bucket `{{alias}}' is now in the config file."
@@ -146,7 +145,7 @@
         "metaSetPre": "These files will be meta set!",
         "metaIndicator": "Metas are as follow: ",
         "metaSetQuestion": "Are you sure to set these meta? Enter `set' to confirm",
-        "metaSet": "`Files meta set for `{{length}}' files in `{{path}}'",
+        "metaSet": "Files meta set for `{{length}}' files in `{{path}}'",
         "metaSeting": "Setting header for `{{key}}'..."
       }
     },
@@ -215,7 +214,6 @@
         "noUnsynced": "No file unsync cached in `{{path}}'.",
         "hasUnsynced": "These files unsync cached in `{{path}}'."
       }
-
     }
   },
   "utils": {

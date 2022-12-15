@@ -39,7 +39,7 @@ export default await new Command()
           t("charts.bucket.endpoint")
         ], [[bucket.name, bucket.alias, bucket.region, bucket.endpoint]]).render();
       }else{
-        colorLog("error", t("commands.config.add.errors.notInEndpoint", { alias }));
+        colorLog("error", t("cliche.errors.notInEndpoint", { alias }));
       }
     }catch(e){
       colorLog("error", e.message);
