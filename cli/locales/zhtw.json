@@ -194,7 +194,7 @@
       }
     },
     "signurl": {
-      "description": "(預簽名收費流程) 獲取可用訪問期十秒的預簽名連結",
+      "description": "(預簽名收費流程)獲取可用訪問期十秒的預簽名連結",
       "examples": {
         "signurl": "獲取 `example' 桶中 test/ 下的檔案"
       },

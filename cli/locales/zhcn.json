@@ -194,7 +194,7 @@
       }
     },
     "signurl": {
-      "description": "(预签名收费流程) 获取可用访问期十秒的预签名链接",
+      "description": "(预签名收费流程)获取可用访问期十秒的预签名链接",
       "examples": {
         "signurl": "获取 `example' 桶中 test/ 下的文件"
       },
