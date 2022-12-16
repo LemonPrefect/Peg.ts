@@ -14,7 +14,7 @@ deno install -A peg.ts
 
 ## 本地化
 
-项目采用了 i18next 做本地化，暂时支持 en-BG, zh-CN, zh-TW, zh-HK 几种语言。可以在 /cli/locales 中新增语言文件。
+项目采用了 i18next 做本地化，暂时支持 en-BG, zh-CN, zh-TW, zh-HK 几种语言（[OpenCC](https://github.com/BYVoid/OpenCC) 采用中）。可以在 /cli/locales 中新增语言文件。
 
 ## 其他
 
