@@ -73,14 +73,14 @@ export default await new Command()
       let files: Array<IFile> = [] as Array<IFile>;
       if(recursive){
         files = await file.getFilesRecurse(doge.path, (key: string) => {
-          recurseLog(`Walking ${key}`);
+          recurseLog(t("cliche.recurse.walking", { key }));
         });
       }else{
         files = (await file.getFiles(doge.path, limit)).files;
       }
       files = file.filterFilesRemote(files, include, exclude);
       if(files.length === 0){
-        throw new CommandError(t("cliche.errors.noFileFound"), "error");
+        throw new CommandError(t("cliche.errors.noFileFound", { path: doge.path }), "error");
       }
       const body: Array<Array<string>> = [] as Array<Array<string>>;
       for(const file of files){
