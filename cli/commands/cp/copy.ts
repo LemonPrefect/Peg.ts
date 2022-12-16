@@ -4,12 +4,13 @@ import { File } from "../../../core/main/File.ts"
 import { IFile } from "../../../core/interfaces/IFile.ts";
 import { bucketInit, parseDogeURL, progressInit, recurseLog } from "../../common/utils.ts";
 import i18n from "../../common/i18n.ts";
+import { options } from "../cp.ts";
 
 const t = i18n();
 const bars = progressInit(t("cliche.bars.copy"));
 
 
-export default async function copy(config: Config, paths: Array<string>, options: Record<string, string | boolean | number | undefined>){
+export default async function copy(config: Config, paths: Array<string>, options: options){
   const source = parseDogeURL((paths[0] as string));
   const destination = parseDogeURL((paths[1] as string));
   const bucket = bucketInit(config, source.bucket);

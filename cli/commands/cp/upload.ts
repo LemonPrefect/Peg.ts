@@ -5,11 +5,13 @@ import { IFile } from "../../../core/interfaces/IFile.ts";
 import { bucketInit, colorLog, parseDogeURL, progressInit, recurseLog } from "../../common/utils.ts";
 import i18n from "../../common/i18n.ts";
 import { CommandError } from "../../exceptions/CommandError.ts";
+import { options } from "../cp.ts";
+
 
 const t = i18n();
 const bars = progressInit(t("cliche.bars.upload"));
 
-export default async function upload(config: Config, paths: Array<string>, options: Record<string, string | boolean | number | Array<string> | undefined>){
+export default async function upload(config: Config, paths: Array<string>, options: options){
   const fullpath = path.resolve(paths[0]);
   const destination = parseDogeURL((paths[1] as string));
   const bucket = bucketInit(config, destination.bucket);

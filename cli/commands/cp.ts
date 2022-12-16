@@ -11,7 +11,7 @@ import copy from "./cp/copy.ts";
 import i18n from "../common/i18n.ts";
 import { CommandError } from "../exceptions/CommandError.ts";
 
-interface options{
+export interface options{
   exclude: string, 
   include: string, 
   partSize: number, 

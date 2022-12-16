@@ -5,11 +5,12 @@ import { IFile } from "../../../core/interfaces/IFile.ts";
 import { bucketInit, colorLog, parseDogeURL, progressInit, recurseLog } from "../../common/utils.ts";
 import i18n from "../../common/i18n.ts";
 import { CommandError } from "../../exceptions/CommandError.ts";
+import { options } from "../cp.ts";
 
 const t = i18n();
 const bars = progressInit(t("cliche.bars.download"));
 
-export default async function download(config: Config, paths: Array<string>, options: Record<string, string | boolean | number | undefined>){
+export default async function download(config: Config, paths: Array<string>, options: options){
   const fullpath = path.resolve(paths[1]);
   const source = parseDogeURL((paths[0] as string));
   const bucket = bucketInit(config, source.bucket);
