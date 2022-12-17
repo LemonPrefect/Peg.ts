@@ -1,0 +1,287 @@
+{
+  "welcome": "歡迎使用 peg, 第三方開源 DogeCloud OSS 指令行工具。",
+  "langMaintainer": "LemonPrefect、OpenCC",
+  "commands": {
+    "config": {
+      "description": "初始化或編輯配置檔案",
+      "add": { 
+        "description": "增加新的儲存桶配置",
+        "examples": {
+          "addBucket": "增加儲存桶配置"
+        },
+        "options": {
+          "alias": "儲存桶別名"
+        },
+        "errors": {
+        },
+        "logs": {
+          "added": "儲存桶 `{{alias}}' 的配置已經寫入配置檔案。"
+        }
+      },
+      "delete": {
+        "description": "刪除存在的儲存桶配置",
+        "examples": {
+          "deleteBucket": "刪除儲存桶配置"
+        },
+        "options": {
+          "alias": "儲存桶別名"
+        },
+        "logs": {
+          "deleted": "儲存桶 `{{alias}}' 的配置(如下)已經從配置中刪除。"
+        }
+      },
+      "init": {
+        "description": "互動式生成配置檔案",
+        "examples": {
+          "init": "初始化配置檔案 ./1.yaml"
+        },
+        "logs": {
+          "configPathSet": "選定配置檔案路徑: (now:{{configPath}})",
+          "accessIdSet": "你的 Secret ID:",
+          "accessKeySet": "你的 Secret Key:",
+          "bucketAliasSet": "要新增的一個儲存桶別名:"
+        }
+      },
+      "set": {
+        "description": "修改配置檔案基礎組的資訊(鑑權)",
+        "examples": {
+          "credentialSet": "設定鑑權憑證"
+        },
+        "logs": {
+          "credentialSet": "憑證已儲存"
+        }
+      },
+      "show": {
+        "description": "輸出指定配置檔案中的配置資訊",
+        "examples": {
+          "showAllInfo": "輸出配置資訊"
+        }
+      }
+    },
+    "cp": {
+      "description": "上傳、下載、(同地域桶中/桶間)複製儲存物件",
+      "examples": {
+        "upload": "上傳檔案",
+        "download": "下載檔案",
+        "copy": "複製檔案"
+      },
+      "options": {
+        "meta": "指定檔案的元資料",
+        "partSize": "(上傳限定) 指定上傳分片塊大小(MB)",
+        "recursive": "遞迴處理檔案",
+        "signURL": "(下載/同步限定) 生成預簽名 URL",
+        "sync": "執行前檢查檔案的 CRC64，操作不一致的檔案",
+        "threadNum": "(上傳限定) 指定單檔案上傳的執行緒數"
+      },
+      "errors": {
+        "noFileToDownload": "沒有找到符合條件的檔案，下載終止。",
+        "fileOccupied": "檔案 `{{fullpath}}' 被佔用。",
+        "metaInvalid": "元資料 `{{meta}}' 無效。",
+        "pathInvalid": "`{{fullpath}}' 既不是有效的檔案也不是有效的目錄。",
+        "urlShouldBeFile": "給定的路徑應該是檔案。",
+        "urlShouldBeDir": "給定的路徑應該是目錄。"
+      },
+      "logs": {
+        "syncHashing": "計算同步雜湊中..."
+      }
+    },
+    "hash": {
+      "description": "獲取本地或遠端檔案的雜湊值(CRC64)",
+      "examples": {
+        "hashFile": "獲取 `example' 桶 test/ 目錄中 `example.file' 的雜湊值"
+      },
+      "options": {
+        "signURL": "使用預簽名 URL。"
+      },
+      "errors": {
+        "noFileFound": "沒有找到 `{{location}}' (中的)檔案。"
+      },
+      "logs": {
+        "noHash": "[沒有雜湊值]"
+      }
+    },
+    "ls": {
+      "description": "列出儲存桶或儲存物件",
+      "examples": {
+        "recursive": "遞迴列出檔案"
+      },
+      "options": {
+        "limit": "結果集大小(0~1000)",
+        "recurse": "遞迴列出檔案"
+      }
+    },
+    "mb": {
+      "description": "新建儲存桶",
+      "examples": {
+        "createBucket": "在成都地域新建儲存桶 `examplebucket'"
+      },
+      "options": {
+        "level": "儲存桶型別"
+      },
+      "logs": {
+        "created": "儲存桶 `{{alias}}' 已建立.",
+        "hintConfig": "此指令不會編輯配置檔案，用 `./peg config add {{alias}}' 以新增儲存桶配置。"
+      },
+      "errors": {
+        "craete": "儲存桶 `{{alias}}' 建立失敗。"
+      }
+    },
+    "meta": {
+      "description": "設定檔案的控制元資料",
+      "examples": {
+        "metaSetSome": "設定、刪除檔案元資料",
+        "metaSetRecurse": "遞迴設定、刪除檔案元資料"
+      },
+      "options": {
+        "meta": "檔案元資料操作",
+        "recursive": "遞迴操作檔案元資料"
+      },
+      "errors": {
+        "headerInvalid": "`元資料 {{header}}' 無效。",
+        "checkFailed": "檔案的元資料將不會更改。"
+
+      },
+      "logs": {
+        "metaSetPre": "以下檔案的元資料將變更。",
+        "metaIndicator": "元資料變動如下: ",
+        "metaSetQuestion": "你確定要這麼變更元資料嗎？輸入 `set' 以確認操作",
+        "metaSet": "為 `{{length}}' 個  `{{path}}' 中的檔案變更了元資料。",
+        "metaSeting": "正在為 `{{key}}' 變更元資料..."
+      }
+    },
+    "mv": {
+      "description": "移動儲存物件",
+      "examples": {
+        "moveFile": "移動檔案",
+        "moveFiles": "將檔案從 `a' 移動到 `b'"
+      },
+      "options": {
+        "force": "移動並覆蓋原有目標",
+        "recursive": "遞迴移動檔案"
+      }
+    },
+    "rb": {
+      "description": "刪除儲存桶",
+      "examples": {
+        "deleteBucket": "刪除成都地域的 `examplebucket'"
+      },
+      "logs": {
+        "deleteConfirm": "你確定要刪除儲存桶 `{{alias}}' 嗎？輸入 `{{alias}}' 以確認",
+        "deleted": "儲存桶 `{{alias}}' 已經被刪除。",
+        "hintConfig": "此指令不會編輯配置檔案，用 `./peg config delete {{alias}}' 以刪除儲存桶配置。"
+      },
+      "errors": {
+        "checkFailed": "儲存桶 `{{alias}}' 將不會被刪除。",
+        "deleteFailedOrNotExist": "儲存桶 `{{alias}}' 刪除失敗，或許不存在。"
+      }
+    },
+    "rm": {
+      "description": "刪除儲存物件",
+      "examples": {
+        "deleteAllFile": "刪除 `example' 桶中的 test/ 下的全部檔案"
+      },
+      "options": {
+        "recursive": "遞迴刪除物件"
+      },
+      "logs": {
+        "deletePre": "以下檔案將被刪除。",
+        "deleteConfirm": "你確定要刪除他們嗎？輸入 `delete' 以確認",
+        "deleted": "檔案已刪除。"
+      },
+      "errors": {
+        "refersToDir": "`{{location}}' 是一個目錄, 用 `-r' 才能刪除他。",
+        "checkFailed": "檔案將不會被刪除。"
+      }
+    },
+    "signurl": {
+      "description": "(預簽名收費流程)獲取可用訪問期十秒的預簽名連結",
+      "examples": {
+        "signurl": "獲取 `example' 桶中 test/ 下的檔案"
+      },
+      "errors": {
+      }
+    },
+    "synccheck": {
+      "description": "檢查檔案與 CDN 節點快取是否一致",
+      "examples": {
+        "checkFiles": "檢查檔案同步性"
+      },
+      "options": {
+        "recursive": "遞迴檢查檔案",
+        "url": "輸出全部需要更新快取的連結"
+      },
+      "logs": {
+        "noUnsynced": "`{{path}}' 中沒有需要重新整理快取的檔案。",
+        "hasUnsynced": "`{{path}}' 中的以下檔案需要重新整理快取。"
+      }
+    }
+  },
+  "utils": {
+    "chart": {
+      "total": "總計: "
+    },
+    "config": {
+      "initFailed": "使用 {{path}} 初始化配置檔案失敗。"
+    },
+    "bucket": {
+      "notExist": "儲存桶 `{{bucketAlias}}' 在配置中不存在。"
+    },
+    "url": {
+      "invalid": "儲存桶 `{{bucket}}' 或路徑 `{{path}}' 不正確。"
+    }
+  },
+  "charts": {
+    "bucket": {
+      "name": "名稱",
+      "alias": "別名",
+      "region": "地域",
+      "endpoint": "終端"
+    },
+    "file": {
+      "key": "檔案", 
+      "type": "型別", 
+      "lastModified": "最後修改時間", 
+      "size": "大小",
+      "lastCached": "最後快取時間"
+    },
+    "meta": {
+      "meta": "元資料", 
+      "change": "變更"
+    }
+  },
+  "cliche": {
+    "configPathIndicator": "配置檔案路徑: {{configPath}}",
+    "basicConfigTitle": "基本配置資訊: ",         
+    "notInEndpoint": "儲存桶 `{{alias}}' 沒有新增，因為其不存在於遠端終端。",
+    "chartBucketTitle": "儲存桶: ",
+    "chargeTip": "公網出流量 CNY0.5/GB/DAY",
+    "options": {
+      "exclude": "從結果集中剔除",
+      "include": "從結果集中選出",
+      "region": "地域"
+    },
+    "bars": {
+      "copy": "正在複製檔案",
+      "download": "正在下載檔案",
+      "upload": "正在上傳檔案",
+      "move": "正在移動檔案"
+    },
+    "recurse": {
+      "walking": "遍歷 `{{key}}'",
+      "hashing": "計算 `{{key}}' 的雜湊",
+      "syncTimeGetting": "獲取 `{{key}}' 的同步時間"
+
+    },
+    "errors": {
+      "argsInvalid": "引數 `{{paths}}' 無效。",
+      "pathInvalid": "`路徑 {{path}}' 無效。",
+      "refersToDir": "`路徑 {{location}}' 需要是檔案。",
+      "noFileFound": "在 `{{path}}' 中沒有找到檔案。"
+    }
+  },
+  "options": {
+    "configPath": "配置檔案路徑(預設 $HOME/.peg.config.yaml)",
+    "secretId": "指定 secretId",
+    "secretKey": "指定 secretKey"
+  }
+}
