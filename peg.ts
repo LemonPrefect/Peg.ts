@@ -19,11 +19,14 @@ if(import.meta.main){
   await main()
 }
 
-async function main(){
+export async function main(){
   return await new Command()
   .name("peg")
   .description(t("welcome"))
-  .version("0.0.221213.1")
+  .version("0.22.1217.1")
+  .meta("deno", Deno.version.deno)
+  .meta("v8", Deno.version.v8)
+  .meta("typescript", Deno.version.typescript)
   .usage("[option/command]")
   .group("Global Options")
   .globalOption("-c, --config-path <configPath:string>", t("options.configPath"))
