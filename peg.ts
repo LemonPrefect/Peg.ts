@@ -1,4 +1,4 @@
-import { Command } from "./cli/common/lib.ts";
+import { Command, UpgradeCommand, GithubProvider } from "./cli/common/lib.ts";
 import ls from "./cli/commands/ls.ts";
 import mb from "./cli/commands/mb.ts";
 import mv from "./cli/commands/mv.ts";
@@ -23,7 +23,10 @@ async function main(){
   return await new Command()
   .name("peg")
   .description(t("welcome"))
-  .version("0.0.221213.1")
+  .version("0.22.1217.1")
+  .meta("deno", Deno.version.deno)
+  .meta("v8", Deno.version.v8)
+  .meta("typescript", Deno.version.typescript)
   .usage("[option/command]")
   .group("Global Options")
   .globalOption("-c, --config-path <configPath:string>", t("options.configPath"))
@@ -44,5 +47,14 @@ async function main(){
   .command("rm", rm)
   .command("signurl", signurl)
   .command("synccheck", synccheck)
+  .command(
+    "upgrade",
+    new UpgradeCommand({      
+      main: "peg.ts",
+      args: ["-A"],
+      provider: [
+        new GithubProvider({ repository: "LemonPrefect/Peg.ts" }),
+      ],
+    }))
   .parse(Deno.args.length === 0 ? ["--help"] : Deno.args);
 }
