@@ -19,4 +19,4 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "peg"
-          entrypoint: "./peg.ts" # TODO: update entrypoint
+          entrypoint: "../peg.ts" # TODO: update entrypoint
