@@ -19,5 +19,4 @@ jobs:
         uses: denoland/deployctl@v1
         with:
           project: "peg"
-          entrypoint: "./src/peg.ts" # TODO: update entrypoint
-          root: "/home/runner/work/Peg.ts/Peg.ts/"
+          entrypoint: "./peg.ts" # TODO: update entrypoint
