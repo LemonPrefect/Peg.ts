@@ -1,4 +1,4 @@
-import { Command, UpgradeCommand, GithubProvider } from "./cli/common/lib.ts";
+import { Command } from "./cli/common/lib.ts";
 import ls from "./cli/commands/ls.ts";
 import mb from "./cli/commands/mb.ts";
 import mv from "./cli/commands/mv.ts";
@@ -19,7 +19,7 @@ if(import.meta.main){
   await main()
 }
 
-async function main(){
+export async function main(){
   return await new Command()
   .name("peg")
   .description(t("welcome"))
@@ -47,14 +47,5 @@ async function main(){
   .command("rm", rm)
   .command("signurl", signurl)
   .command("synccheck", synccheck)
-  .command(
-    "upgrade",
-    new UpgradeCommand({      
-      main: "peg.ts",
-      args: ["-A"],
-      provider: [
-        new GithubProvider({ repository: "LemonPrefect/Peg.ts" }),
-      ],
-    }))
   .parse(Deno.args.length === 0 ? ["--help"] : Deno.args);
 }

@@ -25,13 +25,11 @@ import { Table, Row, Cell } from "https://deno.land/x/cliffy@v0.25.5/table/mod.t
 import { colors } from "https://deno.land/x/cliffy@v0.25.5/ansi/colors.ts";
 import { tty } from "https://deno.land/x/cliffy@v0.25.5/ansi/tty.ts";
 import { ansi } from "https://deno.land/x/cliffy@v0.25.5/ansi/ansi.ts";
-import { GithubProvider, UpgradeCommand } from "https://deno.land/x/cliffy@v0.25.5/command/upgrade/mod.ts";
 export {
   Command, EnumType,
   Input,
   Table, Row, Cell,
   colors,
   tty,
-  ansi,
-  GithubProvider, UpgradeCommand
+  ansi
 };
