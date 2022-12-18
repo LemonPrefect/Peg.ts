@@ -1,3 +1,4 @@
+// deno-lint-ignore-file ban-types no-unused-vars no-empty
 import { FileService } from "../services/file.service.ts"
 import { ConfigService } from "../services/config.service.ts";
 import { IBucket } from "../interfaces/IBucket.ts";
@@ -69,7 +70,7 @@ export class File{
   }
 
   public static async getHashLocal(file: IFile){
-    return FileService.calculateHash(file);
+    return await FileService.calculateHash(file);
   }
 
   public async syncFilter(files: Array<IFile>, sign = false, callback: Function | undefined = undefined){
