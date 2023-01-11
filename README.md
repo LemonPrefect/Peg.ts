@@ -1,4 +1,6 @@
-# Peg
+<img src="https://user-images.githubusercontent.com/39020700/208909385-52e59f21-4adc-4163-a5db-ebdb3d95129e.png" width="40" height="40" />
+
+# Peg.ts
 
 Peg `pʰɛɡ` 是基于 DogeCloud API 为 DogeCloud OSS 进行管理的指令行工具。其想法是帮助 DogeCloud OSS 的用户更方便地对存储桶和文件进行管理。命令行中大部分的指令都与其底层组件也就是 Tencent COS 保持了高度一致（部分文档与指令格式是直接抄过来的）。在实现方面由于 API 的限制与 COSCLI 的处理办法不同。Peg 的所有操作都建立在 DogeCloud OSS API 上，上传的部分则直接使用了 COS SDK。
 
