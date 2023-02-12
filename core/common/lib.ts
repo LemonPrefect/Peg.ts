@@ -7,10 +7,10 @@ export {
 };
 
 /** deno std */
-import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
-import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
-import { Buffer } from "https://deno.land/std@0.167.0/node/buffer.ts";
-import { iterateReader } from "https://deno.land/std@0.162.0/streams/conversion.ts";
+import * as path from "https://deno.land/std@0.177.0/path/mod.ts";
+import * as fs from "https://deno.land/std@0.177.0/node/fs.ts";
+import { Buffer } from "https://deno.land/std@0.177.0/node/buffer.ts";
+import { iterateReader } from "https://deno.land/std@0.172.0/streams/conversion.ts";
 export {
   path,
   fs,

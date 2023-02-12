@@ -9,9 +9,9 @@ export {
 };
 
 /** deno std */
-import * as path from "https://deno.land/std@0.110.0/path/mod.ts";
-import * as fs from "https://deno.land/std@0.167.0/node/fs.ts";
-import { walk } from "https://deno.land/std@0.121.0/fs/walk.ts";
+import * as path from "https://deno.land/std@0.177.0/path/mod.ts";
+import * as fs from "https://deno.land/std@0.177.0/node/fs.ts";
+import { walk } from "https://deno.land/std@0.177.0/fs/walk.ts";
 export {
   path,
   fs,
